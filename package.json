@@ -1,0 +1,27 @@
+{
+  "name": "cashier-safebuy",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "safeBuy — a reputation-gated, x402-paid, delivery-verified, auto-refunding purchase Skill for the Pharos agent economy. Cashier is the demo agent that drives it.",
+  "scripts": {
+    "demo": "bun run src/agent/cashier.ts",
+    "demo:script": "bun run src/agent/cashier.ts --script",
+    "facilitator": "bun run src/pharos/facilitator.ts",
+    "provider": "bun run src/pharos/provider.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.6",
+    "@x402/core": "^2.14.0",
+    "@x402/evm": "^2.14.0",
+    "@x402/express": "^2.14.0",
+    "@x402/fetch": "^2.14.0",
+    "express": "^5.2.1",
+    "solc": "^0.8.35",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  }
+}
