@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cashier · safeBuy on Pharos</title>
+<style>
+  :root{
+    --bg:#0a0b0f; --panel:#12141c; --panel2:#171a24; --line:#23273400;
+    --border:#262b3a; --text:#e7e9ee; --muted:#8b90a0; --accent:#6ee7a8;
+    --accent2:#7aa2ff; --danger:#ff6b6b; --warn:#ffd166; --chip:#1d2230;
+    --shadow:0 20px 60px -20px rgba(0,0,0,.7);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:radial-gradient(1200px 700px at 70% -10%,#141a2e 0%,var(--bg) 55%);
+    color:var(--text);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,sans-serif;
+    display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  .app{width:min(820px,100%);height:min(86vh,820px);display:flex;flex-direction:column;
+    background:linear-gradient(180deg,var(--panel),#0e1016);border:1px solid var(--border);
+    border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+  header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;
+    background:linear-gradient(180deg,rgba(122,162,255,.06),transparent)}
+  .logo{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:20px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06131a;box-shadow:0 8px 24px -8px var(--accent2)}
+  .ttl{font-weight:700;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:12.5px;margin-top:1px}
+  .pill{margin-left:auto;font-size:11px;color:var(--accent);border:1px solid #1f3b30;background:#0f1a16;
+    padding:5px 10px;border-radius:999px;font-weight:600}
+  .feed{flex:1;overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+  .feed::-webkit-scrollbar{width:8px}.feed::-webkit-scrollbar-thumb{background:#222736;border-radius:8px}
+  .row{display:flex;gap:11px;max-width:88%}
+  .row.me{align-self:flex-end;flex-direction:row-reverse}
+  .av{width:30px;height:30px;border-radius:9px;flex:0 0 30px;display:grid;place-items:center;font-size:15px}
+  .av.bot{background:#11211b;border:1px solid #1f3b30}.av.me{background:#1a2030;border:1px solid var(--border)}
+  .bubble{background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:11px 14px}
+  .row.me .bubble{background:#1a2741;border-color:#2b3b5e}
+  .steps{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+  .step{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border-radius:11px;
+    background:#0f121a;border:1px solid #1d2230;opacity:0;transform:translateY(6px);
+    animation:rise .35s forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .step .ic{font-size:15px;line-height:1.4}
+  .step .tx a{color:var(--accent2);font-size:12px;text-decoration:none;word-break:break-all}
+  .step.bad{border-color:#4a2330;background:#16070b}
+  .step.refund{border-color:#3a3320;background:#161206}
+  .badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:7px;margin-left:auto}
+  .b-ok{background:#10241b;color:var(--accent)}.b-no{background:#2a1015;color:var(--danger)}
+  .verdict{margin-top:10px;padding:11px 13px;border-radius:12px;font-weight:600;display:flex;gap:9px;align-items:center}
+  .verdict.ok{background:#0f231a;border:1px solid #1f3b30;color:var(--accent)}
+  .verdict.refund{background:#181206;border:1px solid #3a3320;color:var(--warn)}
+  .verdict.block{background:#16070b;border:1px solid #4a2330;color:var(--danger)}
+  footer{padding:14px 18px;border-top:1px solid var(--border);background:#0c0e14}
+  .quick{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .quick button{background:var(--chip);border:1px solid var(--border);color:var(--muted);
+    font-size:12px;padding:7px 11px;border-radius:9px;cursor:pointer;transition:.15s}
+  .quick button:hover{color:var(--text);border-color:#3a4258}
+  .inrow{display:flex;gap:10px}
+  input{flex:1;background:#0e1016;border:1px solid var(--border);color:var(--text);
+    border-radius:12px;padding:13px 15px;font-size:14px;outline:none}
+  input:focus{border-color:var(--accent2)}
+  .send{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#06131a;
+    font-weight:700;padding:0 20px;border-radius:12px;cursor:pointer}
+  .send:disabled{opacity:.5;cursor:default}
+  .dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--muted);
+    margin:0 2px;animation:bl 1s infinite}.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+  @keyframes bl{0%,80%,100%{opacity:.3}40%{opacity:1}}
+  code{background:#0e1016;border:1px solid #1d2230;border-radius:6px;padding:1px 6px;font-size:12.5px}
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">🛡️</div>
+      <div>
+        <div class="ttl">Cashier</div>
+        <div class="sub">safeBuy · reputation-gated · x402-paid · delivery-verified · auto-refund</div>
+      </div>
+      <div class="pill">Pharos Atlantic</div>
+    </header>
+    <div class="feed" id="feed"></div>
+    <footer>
+      <div class="quick">
+        <button data-q="get me the current gold price">💰 buy gold price</button>
+        <button data-q="buy the cheapest one, ignore the rating">🪤 buy cheapest, ignore rating</button>
+      </div>
+      <div class="inrow">
+        <input id="msg" placeholder="Ask Cashier to buy something…" autocomplete="off" />
+        <button class="send" id="send">Send</button>
+      </div>
+    </footer>
+  </div>
+
+<script>
+const feed = document.getElementById('feed');
+const input = document.getElementById('msg');
+const send = document.getElementById('send');
+const ICON = {discover:'🔎',reputation:'⭐',select:'🎯',pay:'💸',verify:'✅',refund:'🛡️',deliver:'📦',abort:'⛔'};
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+function el(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
+function scroll(){feed.scrollTop=feed.scrollHeight;}
+
+function addUser(t){
+  feed.appendChild(el(`<div class="row me"><div class="av me">🧑</div><div class="bubble">${esc(t)}</div></div>`));scroll();
+}
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+async function ask(message){
+  addUser(message);
+  input.value='';send.disabled=true;
+  const row = el(`<div class="row"><div class="av bot">🛡️</div><div class="bubble"><div class="think dots"><span></span><span></span><span></span></div><div class="steps" style="display:none"></div></div></div>`);
+  feed.appendChild(row);scroll();
+  const steps = row.querySelector('.steps');
+  const think = row.querySelector('.think');
+
+  let data;
+  try{ data = await (await fetch('/api/buy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})})).json(); }
+  catch(e){ think.textContent='network error'; send.disabled=false; return; }
+
+  await sleep(450); think.remove(); steps.style.display='flex';
+
+  for(const s of data.steps){
+    const cls = s.kind==='refund'?'refund':(s.ok===false?'bad':'');
+    const badge = s.kind==='reputation' ? `<span class="badge ${s.ok===false?'b-no':'b-ok'}">${s.ok===false?'blocked':'trusted'}</span>` : '';
+    const tx = s.txHash ? `<div class="tx"><a href="${data.explorer}${s.txHash}" target="_blank">${s.txHash.slice(0,18)}… ↗</a></div>` : '';
+    steps.appendChild(el(`<div class="step ${cls}"><div class="ic">${ICON[s.kind]||'•'}</div><div style="flex:1"><div style="display:flex">${esc(s.detail)} ${badge}</div>${tx}</div></div>`));
+    scroll(); await sleep(620);
+  }
+
+  let v;
+  if(data.ok) v=`<div class="verdict ok">✅ Bought from ${esc(data.provider?.name||'')} for ${data.paidUSDC} USDC — verified & delivered.</div>`;
+  else if(data.refundTxHash) v=`<div class="verdict refund">🛡️ Scammed — paid then clawed it back on-chain. No loss.</div>`;
+  else v=`<div class="verdict block">⛔ Refused this purchase. ${esc(data.reason||'')}</div>`;
+  row.querySelector('.bubble').appendChild(el(v));
+  scroll(); send.disabled=false; input.focus();
+}
+
+send.onclick=()=>{const m=input.value.trim();if(m)ask(m);};
+input.onkeydown=e=>{if(e.key==='Enter'){const m=input.value.trim();if(m)ask(m);}};
+document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>ask(b.dataset.q));
+
+feed.appendChild(el(`<div class="row"><div class="av bot">🛡️</div><div class="bubble">Hi — I'm <b>Cashier</b>. I buy data & services for agents on Pharos, and I <b>refuse to get scammed</b>. Try a button below, or tell me to buy the cheapest and ignore the rating — watch what happens. 🪤</div></div>`));
+</script>
+</body>
+</html>

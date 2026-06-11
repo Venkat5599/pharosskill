@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="520" viewBox="0 0 940 520" font-family="ui-sans-serif,Segoe UI,Inter,sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0e1220"/><stop offset="1" stop-color="#0a0b0f"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6ee7a8"/><stop offset="1" stop-color="#7aa2ff"/>
+    </linearGradient>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#7aa2ff"/>
+    </marker>
+  </defs>
+
+  <rect width="940" height="520" rx="18" fill="url(#bg)"/>
+  <text x="34" y="46" fill="#e7e9ee" font-size="22" font-weight="700">safeBuy</text>
+  <text x="118" y="46" fill="#8b90a0" font-size="14">— the trust loop for autonomous agent commerce on Pharos</text>
+  <rect x="772" y="28" width="134" height="26" rx="13" fill="#0f1a16" stroke="#1f3b30"/>
+  <text x="839" y="45" fill="#6ee7a8" font-size="12" font-weight="600" text-anchor="middle">Pharos Atlantic</text>
+
+  <!-- agent -->
+  <rect x="34" y="92" width="160" height="64" rx="13" fill="#171a24" stroke="#262b3a"/>
+  <text x="114" y="120" fill="#e7e9ee" font-size="14" font-weight="600" text-anchor="middle">Cashier agent</text>
+  <text x="114" y="139" fill="#8b90a0" font-size="11.5" text-anchor="middle">chat · CLI / web</text>
+
+  <!-- skill core -->
+  <rect x="250" y="80" width="440" height="270" rx="16" fill="#10131c" stroke="#2b3350"/>
+  <text x="270" y="108" fill="url(#accent)" font-size="14" font-weight="700">safeBuy( req, deps )  — independent skill core</text>
+
+  <g font-size="12.5">
+    <rect x="270" y="124" width="180" height="46" rx="10" fill="#0f121a" stroke="#1d2230"/>
+    <text x="284" y="146" fill="#e7e9ee">🔎 discover</text>
+    <text x="284" y="162" fill="#8b90a0" font-size="11">ProviderRegistry</text>
+
+    <rect x="270" y="180" width="180" height="46" rx="10" fill="#0f121a" stroke="#1d2230"/>
+    <text x="284" y="202" fill="#e7e9ee">⭐ reputation-gate</text>
+    <text x="284" y="218" fill="#8b90a0" font-size="11">ReputationOracle</text>
+
+    <rect x="270" y="236" width="180" height="46" rx="10" fill="#0f121a" stroke="#1d2230"/>
+    <text x="284" y="258" fill="#e7e9ee">💸 pay</text>
+    <text x="284" y="274" fill="#8b90a0" font-size="11">PaymentRail (x402)</text>
+
+    <rect x="270" y="292" width="180" height="46" rx="10" fill="#0f121a" stroke="#1d2230"/>
+    <text x="284" y="314" fill="#e7e9ee">✅ verify delivery</text>
+    <text x="284" y="330" fill="#8b90a0" font-size="11">Verifier (schema)</text>
+
+    <!-- branch -->
+    <rect x="480" y="208" width="190" height="46" rx="10" fill="#0f231a" stroke="#1f3b30"/>
+    <text x="494" y="230" fill="#6ee7a8">📦 deliver</text>
+    <text x="494" y="246" fill="#8b90a0" font-size="11">schema matches → done</text>
+
+    <rect x="480" y="264" width="190" height="56" rx="10" fill="#161206" stroke="#3a3320"/>
+    <text x="494" y="286" fill="#ffd166">🛡️ refund</text>
+    <text x="494" y="303" fill="#8b90a0" font-size="11">bad delivery → slash</text>
+    <text x="494" y="316" fill="#8b90a0" font-size="11">provider stake</text>
+  </g>
+
+  <!-- on-chain layer -->
+  <rect x="250" y="392" width="656" height="96" rx="16" fill="#0d1018" stroke="#262b3a"/>
+  <text x="270" y="416" fill="#8b90a0" font-size="12" font-weight="600">ON-CHAIN · Pharos Atlantic (688689)</text>
+  <g font-size="12">
+    <rect x="270" y="426" width="190" height="48" rx="10" fill="#12141c" stroke="#262b3a"/>
+    <text x="284" y="447" fill="#e7e9ee">SafeUSD</text><text x="284" y="463" fill="#8b90a0" font-size="11">EIP-3009 token</text>
+    <rect x="478" y="426" width="190" height="48" rx="10" fill="#12141c" stroke="#262b3a"/>
+    <text x="492" y="447" fill="#e7e9ee">ReputationRegistry</text><text x="492" y="463" fill="#8b90a0" font-size="11">ERC-8004 scoreOf</text>
+    <rect x="686" y="426" width="200" height="48" rx="10" fill="#12141c" stroke="#262b3a"/>
+    <text x="700" y="447" fill="#e7e9ee">SafeBuyBond</text><text x="700" y="463" fill="#8b90a0" font-size="11">stake / slash refund</text>
+  </g>
+
+  <!-- arrows -->
+  <g stroke="#7aa2ff" stroke-width="1.6" fill="none" marker-end="url(#arr)">
+    <path d="M194,124 C220,124 230,140 248,150"/>
+    <path d="M360,170 L360,178"/>
+    <path d="M360,226 L360,234"/>
+    <path d="M360,282 L360,290"/>
+    <path d="M450,210 C466,210 466,224 478,228"/>
+    <path d="M450,300 C464,300 468,294 478,292"/>
+    <path d="M365,338 L365,388"/>
+    <path d="M575,254 L575,388"/>
+  </g>
+  <text x="470" y="372" fill="#8b90a0" font-size="11">x402 settle</text>
+  <text x="362" y="372" fill="#8b90a0" font-size="11">reputation read</text>
+</svg>

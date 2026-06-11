@@ -8,6 +8,7 @@
     "demo:script": "bun run src/agent/cashier.ts --script",
     "facilitator": "bun run src/pharos/facilitator.ts",
     "provider": "bun run src/pharos/provider.ts",
+    "web": "bun run src/web/server.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

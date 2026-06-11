@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="300" viewBox="0 0 940 300" font-family="ui-sans-serif,Segoe UI,Inter,sans-serif">
+  <rect width="940" height="300" rx="16" fill="#0a0b0f"/>
+  <text x="28" y="40" fill="#e7e9ee" font-size="17" font-weight="700">"buy the cheapest one, ignore the rating"</text>
+  <text x="28" y="60" fill="#8b90a0" font-size="12.5">Cashier obeys, gets scammed — then refunds itself on-chain. No loss.</text>
+
+  <!-- panel 1 -->
+  <g>
+    <rect x="28" y="80" width="280" height="190" rx="13" fill="#12141c" stroke="#262b3a"/>
+    <text x="46" y="108" fill="#8b90a0" font-size="11" font-weight="700">1 · SELECT</text>
+    <rect x="46" y="120" width="244" height="40" rx="9" fill="#0f121a" stroke="#1d2230"/>
+    <text x="58" y="138" fill="#e7e9ee" font-size="12">⭐ TrustFeed 0.92</text>
+    <text x="250" y="138" fill="#6ee7a8" font-size="11" font-weight="700" text-anchor="end">trusted</text>
+    <text x="58" y="152" fill="#8b90a0" font-size="10.5">skipped — not cheapest</text>
+    <rect x="46" y="166" width="244" height="44" rx="9" fill="#16070b" stroke="#4a2330"/>
+    <text x="58" y="185" fill="#e7e9ee" font-size="12">❌ CheapData 0.18</text>
+    <text x="250" y="185" fill="#ff6b6b" font-size="11" font-weight="700" text-anchor="end">unrated</text>
+    <text x="58" y="200" fill="#8b90a0" font-size="10.5">🎯 forced pick (cheapest)</text>
+    <rect x="46" y="222" width="244" height="34" rx="9" fill="#0f121a" stroke="#1d2230"/>
+    <text x="58" y="243" fill="#8b90a0" font-size="11">reputation read · ERC-8004</text>
+  </g>
+
+  <!-- panel 2 -->
+  <g>
+    <rect x="330" y="80" width="280" height="190" rx="13" fill="#12141c" stroke="#262b3a"/>
+    <text x="348" y="108" fill="#8b90a0" font-size="11" font-weight="700">2 · PAY + VERIFY</text>
+    <rect x="348" y="120" width="244" height="44" rx="9" fill="#0f121a" stroke="#1d2230"/>
+    <text x="360" y="139" fill="#e7e9ee" font-size="12">💸 paid 0.01 USDC · x402</text>
+    <text x="360" y="154" fill="#7aa2ff" font-size="10.5">0xd66d103a… ↗  (real tx)</text>
+    <rect x="348" y="172" width="244" height="84" rx="9" fill="#16070b" stroke="#4a2330"/>
+    <text x="360" y="194" fill="#ff6b6b" font-size="12">❌ delivery FAILED</text>
+    <text x="360" y="212" fill="#8b90a0" font-size="11">returned: {"lol":"gimme money"}</text>
+    <text x="360" y="230" fill="#8b90a0" font-size="11">missing required "asset"</text>
+    <text x="360" y="248" fill="#8b90a0" font-size="11">schema check · deterministic</text>
+  </g>
+
+  <!-- panel 3 -->
+  <g>
+    <rect x="632" y="80" width="280" height="190" rx="13" fill="#12141c" stroke="#262b3a"/>
+    <text x="650" y="108" fill="#8b90a0" font-size="11" font-weight="700">3 · REFUND (on-chain)</text>
+    <rect x="650" y="120" width="244" height="58" rx="9" fill="#161206" stroke="#3a3320"/>
+    <text x="662" y="142" fill="#ffd166" font-size="12">🛡️ SafeBuyBond.slash</text>
+    <text x="662" y="159" fill="#8b90a0" font-size="11">reclaimed 0.01 USDC from</text>
+    <text x="662" y="172" fill="#8b90a0" font-size="11">scammer's staked bond</text>
+    <rect x="650" y="186" width="244" height="34" rx="9" fill="#0f121a" stroke="#1d2230"/>
+    <text x="662" y="207" fill="#7aa2ff" font-size="10.5">0x41079e3c… ↗  (real refund tx)</text>
+    <rect x="650" y="228" width="244" height="30" rx="9" fill="#0f231a" stroke="#1f3b30"/>
+    <text x="772" y="248" fill="#6ee7a8" font-size="11.5" font-weight="700" text-anchor="middle">buyer made whole ✓</text>
+  </g>
+
+  <!-- arrows between panels -->
+  <g stroke="#7aa2ff" stroke-width="1.6" fill="none">
+    <path d="M308,175 L330,175" marker-end="url(#a2)"/>
+    <path d="M610,175 L632,175" marker-end="url(#a2)"/>
+  </g>
+  <defs><marker id="a2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#7aa2ff"/></marker></defs>
+</svg>

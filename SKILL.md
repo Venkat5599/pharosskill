@@ -84,8 +84,9 @@ buyer back from the scammer's staked collateral. Full walkthrough → [LIVE_DEPL
 
 ```bash
 bun install
+bun run web                # 🖥️ web chatbox → http://localhost:4040  (best for judges)
 bun run demo:script        # honest buy + scam→auto-refund, no setup
-bun run demo               # chat with Cashier yourself
+bun run demo               # terminal chat
 ```
 
 ```
@@ -138,6 +139,8 @@ Go live on Pharos: see [LIVE_DEPLOYMENT.md](./LIVE_DEPLOYMENT.md) (`deployToken`
 
 ## 🔍 How it works
 
+![architecture](./docs/architecture.svg)
+
 ```
                         safeBuy(req, deps)
                                │
@@ -180,7 +183,9 @@ contracts/        SafeUSD.sol (EIP-3009) · ReputationRegistry.sol · SafeBuyBon
 src/skill/        safeBuy.ts · types.ts · verify.ts        ← THE skill (independent)
 src/adapters/     registry · reputation (+ERC-8004) · payment (+Pharos x402 +bond refund)
 src/pharos/       config · provider (x402 server) · facilitator · deployToken · deployInfra · liveBuy
-src/agent/        cashier.ts                                ← demo agent (judges chat here)
+src/agent/        cashier.ts                                ← CLI demo agent
+src/web/          server.ts + public/index.html             ← web chatbox (judges chat here)
+docs/             architecture.svg · demo-storyboard.svg
 SKILL.md · README.md · LIVE_DEPLOYMENT.md
 ```
 

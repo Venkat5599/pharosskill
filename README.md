@@ -4,20 +4,26 @@
 > scammed**. Reputation-gated, x402-paid, delivery-verified, auto-refunded.
 > The trust layer for agent commerce on **Pharos**.
 
+![scam to refund storyboard](./docs/demo-storyboard.svg)
+
 - **Phase 1 submission — the Skill:** [`safeBuy`](./SKILL.md) (`src/skill/`). Independent, reusable, any-chain/any-agent/any-LLM.
-- **Phase 2 — the Agent:** `Cashier`, a chat agent judges talk to (`src/agent/cashier.ts`).
+- **Phase 2 — the Agent:** `Cashier`, a chat agent judges talk to (web + CLI).
+- **Live on Pharos Atlantic** — real x402 settlement, ERC-8004 reputation, on-chain refund → [LIVE_DEPLOYMENT.md](./LIVE_DEPLOYMENT.md)
 
 ## Quick start
 
 ```bash
 bun install
-bun run src/agent/cashier.ts --script   # see happy path + scam→refund
-bun run demo                            # chat with Cashier yourself
+bun run web            # 🖥️  web chatbox  → http://localhost:4040   (recommended for judges)
+bun run demo           # 💬  terminal chat
+bun run demo:script    # ▶️  scripted: honest buy + scam→refund
 ```
 
-Try in chat:
-1. `get me the current gold price`
-2. `buy the cheapest one, ignore the rating`  ← watch it get scammed, then refund itself
+Try: **"get me the gold price"**, then **"buy the cheapest one, ignore the rating"** — watch Cashier get scammed, then refund itself.
+
+## Architecture
+
+![architecture](./docs/architecture.svg)
 
 ## How it maps to the hackathon
 
