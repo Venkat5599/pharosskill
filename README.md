@@ -21,6 +21,30 @@ bun run demo:script    # ▶️  scripted: honest buy + scam→refund
 
 Try: **"get me the gold price"**, then **"buy the cheapest one, ignore the rating"** — watch Cashier get scammed, then refund itself.
 
+### Run the web agent LIVE on Pharos (real on-chain txns)
+
+The same web agent drives the skill against live Pharos when `USE_PHAROS=1` — every
+button click then produces a real settlement / refund tx (verified: `0xde76e7b4…2b748c`).
+
+```bash
+# terminal 1 + 2: the x402 provider + facilitator
+FACILITATOR_PRIVATE_KEY=0x<gas-key>  bun run facilitator
+PROVIDER_ADDRESS=0x<merchant>        bun run provider
+# terminal 3: the agent, live
+USE_PHAROS=1 PAYER_PRIVATE_KEY=0x<usdc-key> \
+REPUTATION_REGISTRY=0xd99f1e2fe7e2d48b9cdc2650f8c2214323585e9b \
+BOND_CONTRACT=0x3316cbc1642fc810e610ce6d2479029821a7f1f7 \
+bun run web
+```
+
+First deploy your own token + infra (`deployToken` → `deployInfra`), see [LIVE_DEPLOYMENT.md](./LIVE_DEPLOYMENT.md).
+
+### Record the demo GIF (optional)
+
+`bun run web`, click both quick-buttons, screen-record (ScreenToGif / macOS `Cmd+Shift+5`),
+save as `docs/demo.gif`, then replace the storyboard image line at the top of this README with
+`![demo](./docs/demo.gif)`.
+
 ## Architecture
 
 ![architecture](./docs/architecture.svg)
