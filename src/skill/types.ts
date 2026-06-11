@@ -40,6 +40,8 @@ export interface PaymentReceipt {
   paidUSDC: number;
   /** Raw body the provider returned after payment. */
   response: unknown;
+  /** Provider's on-chain identity — used to target its bond on refund. */
+  providerAgent?: string;
 }
 
 /** Pays a provider over x402 (or any rail) and optionally refunds. */

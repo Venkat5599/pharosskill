@@ -76,7 +76,8 @@ const tokenAddress = receipt.contractAddress!;
 console.log("✅ SafeUSD deployed at:", tokenAddress);
 
 // 4. mint 1000 sUSD to the payer
-const token = getContract({ address: tokenAddress, abi, client: wallet });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const token: any = getContract({ address: tokenAddress, abi, client: wallet });
 const mintHash = await token.write.mint([account.address, parseUnits("1000", 6)]);
 await pub.waitForTransactionReceipt({ hash: mintHash });
 const bal = (await token.read.balanceOf([account.address])) as bigint;

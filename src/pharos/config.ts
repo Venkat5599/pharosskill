@@ -10,6 +10,9 @@ export const TEST_USDC = (process.env.TEST_USDC ??
   "0xf61cbfe72aa03a12a64122b0ada0b19ce57ad80d") as `0x${string}`;
 export const TOKEN_NAME = process.env.SUSD_NAME ?? "SafeUSD";
 export const TOKEN_VERSION = process.env.SUSD_VERSION ?? "1";
+// Live trust infra (set after deployInfra.ts). Empty = use offline fallbacks.
+export const REPUTATION_REGISTRY = (process.env.REPUTATION_REGISTRY ?? "") as `0x${string}` | "";
+export const BOND_CONTRACT = (process.env.BOND_CONTRACT ?? "") as `0x${string}` | "";
 export const USDC_DECIMALS = 6;
 export const EXPLORER_TX = process.env.PHAROS_EXPLORER ?? "https://testnet.pharosscan.xyz/tx/";
 
