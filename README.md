@@ -14,9 +14,9 @@
 
 ```bash
 bun install
-bun run web            # 🖥️  web chatbox  → http://localhost:4040   (recommended for judges)
-bun run demo           # 💬  terminal chat
-bun run demo:script    # ▶️  scripted: honest buy + scam→refund
+bun run web            #   web chatbox  → http://localhost:4040   (recommended for judges)
+bun run demo           #   terminal chat
+bun run demo:script    # ▶  scripted: honest buy + scam→refund
 ```
 
 Try: **"get me the gold price"**, then **"buy the cheapest one, ignore the rating"** — watch Cashier get scammed, then refund itself.
@@ -71,9 +71,9 @@ SKILL.md                                            ← skill spec
 
 ## Status
 
-- ✅ Skill core + verify + refund loop, typed, `tsc` clean
-- ✅ Cashier chat agent, offline demo (happy path + scam→refund)
-- ✅ **LIVE on Pharos Atlantic** — full trust loop on-chain. See [LIVE_DEPLOYMENT.md](./LIVE_DEPLOYMENT.md)
+-  Skill core + verify + refund loop, typed, `tsc` clean
+-  Cashier chat agent, offline demo (happy path + scam→refund)
+-  **LIVE on Pharos Atlantic** — full trust loop on-chain. See [LIVE_DEPLOYMENT.md](./LIVE_DEPLOYMENT.md)
   - real x402 EIP-3009 settlement ([`0xd015239a…`](https://testnet.pharosscan.xyz/tx/0xd015239aedf60562417334a2e485bedcfc767e9de6dd08c0e20abb50233b2302))
   - live **ERC-8004 reputation** read (`ReputationRegistry 0xd99f1e2f…`)
   - real **on-chain refund** via stake slash (`SafeBuyBond 0x3316cbc1…`, refund tx [`0x41079e3c…`](https://testnet.pharosscan.xyz/tx/0x41079e3cec09327f3ffb180d536469676e1a8b2a2d7c338f5f06f71383dd43dd))

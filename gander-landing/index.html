@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cashier · safeBuy — the agent that refuses to get scammed</title>
+<meta name="description" content="An autonomous agent that buys anything on-chain by chat — reputation-gated, x402-paid, delivery-verified, auto-refunded. The trust layer for agent commerce on Pharos." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#141210;
+    --paper:#f4efe6;
+    --cream:#efe7d8;
+    --accent:#ff5436;
+    --lime:#c8e64b;
+    --sky:#7fc6e8;
+    --pink:#ffb7c9;
+    --line:rgba(20,18,16,.14);
+    --r:22px;
+    --maxw:1320px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:"Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  ::selection{background:var(--accent);color:#fff}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+  .display{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;line-height:.92;letter-spacing:-.02em}
+  .serif{font-family:"Instrument Serif",serif;font-weight:400;font-style:italic}
+  .mono{font-family:"JetBrains Mono",monospace}
+
+  /* NAV */
+  header{position:sticky;top:0;z-index:50;backdrop-filter:saturate(140%) blur(10px);background:color-mix(in srgb,var(--paper) 78%,transparent);border-bottom:1px solid var(--line)}
+  nav{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .logo{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:25px;letter-spacing:-.04em;display:flex;align-items:center;gap:9px}
+  .logo .dot{width:13px;height:13px;border-radius:50%;background:var(--accent);display:inline-block;animation:wob 3s ease-in-out infinite}
+  @keyframes wob{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.15)}}
+  .navlinks{display:flex;gap:28px;font-weight:500;font-size:15px}
+  .navlinks a{position:relative;padding:4px 0}
+  .navlinks a::after{content:"";position:absolute;left:0;bottom:-1px;width:0;height:2px;background:var(--ink);transition:width .25s}
+  .navlinks a:hover::after{width:100%}
+  .cta{background:var(--ink);color:var(--paper);padding:11px 20px;border-radius:100px;font-weight:600;font-size:14px;transition:transform .2s,background .2s}
+  .cta:hover{transform:translateY(-2px);background:var(--accent)}
+  @media(max-width:860px){.navlinks{display:none}}
+
+  /* HERO */
+  .hero{padding:70px 0 36px;position:relative}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.16em;color:var(--accent)}
+  .eyebrow::before{content:"";width:26px;height:1.5px;background:var(--accent)}
+  .hero h1{font-size:clamp(48px,8.4vw,128px);margin:22px 0 0;max-width:15ch}
+  .hero h1 em{font-family:"Instrument Serif",serif;font-weight:400;font-style:italic;color:var(--accent)}
+  .hero-sub{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-top:32px;flex-wrap:wrap}
+  .hero-sub p{max-width:50ch;font-size:clamp(17px,1.7vw,21px);line-height:1.5;color:#3a342c}
+  .hero-actions{display:flex;gap:14px;margin-top:30px;flex-wrap:wrap}
+  .btn-primary{background:var(--accent);color:#fff;padding:15px 26px;border-radius:100px;font-weight:600;font-size:16px;transition:transform .2s}
+  .btn-primary:hover{transform:translateY(-2px)}
+  .btn-ghost{border:1.5px solid var(--ink);padding:15px 26px;border-radius:100px;font-weight:600;font-size:16px;transition:background .2s,color .2s}
+  .btn-ghost:hover{background:var(--ink);color:var(--paper)}
+  .badges{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+  .badge{font-size:12.5px;font-weight:600;padding:7px 13px;border-radius:100px;border:1px solid var(--line);background:var(--cream);display:inline-flex;align-items:center;gap:7px}
+  .badge .d{width:7px;height:7px;border-radius:50%;background:var(--lime)}
+
+  /* TICKER */
+  .ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:44px;background:var(--ink);color:var(--paper);overflow:hidden;padding:16px 0}
+  .ticker-row{display:flex;gap:42px;width:max-content;animation:scroll 26s linear infinite}
+  .ticker-row span{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:28px;letter-spacing:-.02em;display:flex;align-items:center;gap:42px;white-space:nowrap}
+  .ticker-row span::after{content:"→";color:var(--accent);font-size:20px}
+  @keyframes scroll{to{transform:translateX(-50%)}}
+
+  section{padding:88px 0}
+  .sec-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:42px;flex-wrap:wrap;gap:18px}
+  .sec-head h2{font-size:clamp(34px,5vw,62px)}
+  .sec-head p{max-width:40ch;color:#3a342c;font-size:17px;line-height:1.5}
+  .sec-head h2 em{font-family:"Instrument Serif",serif;font-style:italic;font-weight:400;color:var(--accent)}
+
+  /* THE LOOP — step cards (CSS-built, no images) */
+  .loop{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+  .step{grid-column:span 4;background:var(--cream);border:1px solid var(--line);border-radius:var(--r);padding:26px;position:relative;overflow:hidden;transition:transform .35s,box-shadow .35s}
+  .step:hover{transform:translateY(-6px);box-shadow:0 22px 44px -26px rgba(20,18,16,.5)}
+  .step .n{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:600;color:var(--accent)}
+  .step .ic{font:600 11px/1 "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:16px 0 16px;display:inline-block;padding:6px 10px;border:1px solid var(--line);border-radius:100px}
+  .step.kill .ic{color:var(--lime);border-color:rgba(244,239,230,.2)}
+  .step.win .ic{color:var(--ink);border-color:rgba(20,18,16,.25)}
+  .step h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:23px;letter-spacing:-.02em;margin-bottom:8px}
+  .step p{font-size:15px;line-height:1.5;color:#3a342c}
+  .step.kill{background:var(--ink);color:var(--paper)}
+  .step.kill p{color:rgba(244,239,230,.72)}
+  .step.kill .n{color:var(--lime)}
+  .step.win{background:var(--lime)}
+  @media(max-width:860px){.loop{grid-template-columns:repeat(6,1fr)}.step{grid-column:span 6}}
+  @media(max-width:520px){.step{grid-column:span 6;grid-column:1/-1}}
+
+  /* DEMO STRIP — terminal mock */
+  .demo{background:var(--ink);color:var(--paper);border-radius:40px;margin:0 14px;padding:70px 0 76px;overflow:hidden}
+  .demo .wrap{max-width:1100px}
+  .demo .grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+  .demo h2{font-size:clamp(32px,4.6vw,56px)}
+  .demo h2 em{color:var(--lime);font-family:"Instrument Serif",serif;font-style:italic;font-weight:400}
+  .demo p{color:rgba(244,239,230,.74);font-size:17px;line-height:1.55;margin-top:18px;max-width:42ch}
+  .demo .btn-primary{margin-top:26px;display:inline-block}
+  .term{background:#0c0b09;border:1px solid rgba(244,239,230,.14);border-radius:16px;overflow:hidden;font-family:"JetBrains Mono",monospace;font-size:13px;box-shadow:0 30px 60px -30px rgba(0,0,0,.7)}
+  .term .bar{display:flex;gap:7px;padding:13px 15px;border-bottom:1px solid rgba(244,239,230,.1)}
+  .term .bar i{width:11px;height:11px;border-radius:50%;background:#ff5f56}
+  .term .bar i:nth-child(2){background:#ffbd2e}.term .bar i:nth-child(3){background:#27c93f}
+  .term .body{padding:18px 18px 22px;line-height:1.65;white-space:pre-wrap}
+  .term .u{color:var(--sky)}.term .ok{color:var(--lime)}.term .bad{color:#ff7a66}.term .dim{color:#7d766a}
+  @media(max-width:860px){.demo .grid2{grid-template-columns:1fr;gap:34px}}
+
+  /* CAPABILITIES marquees */
+  .caps{padding:0}
+  .caps-in{padding:86px 0}
+  .marquee{overflow:hidden;border-top:1px solid var(--line);padding:16px 0}
+  .marquee:last-child{border-bottom:1px solid var(--line)}
+  .mq-row{display:flex;gap:30px;width:max-content;align-items:center}
+  .mq-row .lead{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,42px);letter-spacing:-.02em;white-space:nowrap}
+  .mq-row .sub{font-size:15px;color:#7d766a;white-space:nowrap}
+  .mq-row .sub::before{content:"—  "}
+  .m-l{animation:scroll 30s linear infinite}.m-r{animation:scroll 34s linear infinite reverse}
+  .marquee:hover .mq-row{animation-play-state:paused}
+
+  /* PROOF — live on-chain */
+  .proof .pcard-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .pcard{background:var(--cream);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:12px;transition:transform .3s,box-shadow .3s}
+  .pcard:hover{transform:translateY(-5px);box-shadow:0 18px 40px -22px rgba(20,18,16,.5)}
+  .pcard .pk{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+  .pcard h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:20px;letter-spacing:-.02em}
+  .pcard p{font-size:14.5px;line-height:1.5;color:#3a342c;flex:1}
+  .pcard .tx{font-family:"JetBrains Mono",monospace;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:7px;word-break:break-all}
+  .pcard .tx::before{content:"tx";font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--accent);font-weight:700}
+  @media(max-width:860px){.proof .pcard-grid{grid-template-columns:1fr}}
+
+  /* STACK */
+  .stack-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+  .chip{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:600;padding:9px 15px;border-radius:100px;background:var(--cream);border:1px solid var(--line)}
+
+  /* CTA */
+  .planet{background:var(--lime);color:var(--ink);border-radius:40px;margin:0 14px;padding:88px 0;text-align:center;position:relative;overflow:hidden}
+  .planet h2{font-size:clamp(38px,7.2vw,98px);line-height:.95}
+  .planet h2 em{font-family:"Instrument Serif",serif;font-style:italic;font-weight:400}
+  .planet p{margin:22px auto 30px;max-width:44ch;font-size:19px}
+  .planet .btn-primary{background:var(--ink);color:var(--lime)}
+  .planet .blob{position:absolute;border-radius:50%;filter:blur(2px);opacity:.5}
+  .b1{width:160px;height:160px;background:var(--accent);top:-40px;left:6%}
+  .b2{width:120px;height:120px;background:var(--sky);bottom:-30px;right:10%}
+  .b3{width:90px;height:90px;background:var(--pink);top:30%;right:18%}
+
+  footer{padding:68px 0 48px}
+  .foot{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;align-items:flex-end}
+  .foot .big{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(38px,6.4vw,84px);letter-spacing:-.03em;line-height:.9}
+  .foot .cols{display:flex;gap:56px;flex-wrap:wrap}
+  .foot .col h4{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:#8a8073;margin-bottom:14px}
+  .foot .col a{display:block;font-weight:500;font-size:16px;margin-bottom:9px;transition:color .2s}
+  .foot .col a:hover{color:var(--accent)}
+  .legal{margin-top:50px;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:13px;color:#8a8073}
+
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s}
+  .reveal.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <a class="logo" href="#"><span class="dot"></span>cashier</a>
+    <div class="navlinks">
+      <a href="#how">How it works</a>
+      <a href="#capabilities">Skill</a>
+      <a href="#proof">Live proof</a>
+      <a href="/dashboard">Dashboard</a>
+    </div>
+    <a class="cta" href="/dashboard">Open Cashier →</a>
+  </nav>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero wrap">
+    <span class="eyebrow">The trust layer for agent commerce · Pharos</span>
+    <h1 class="display">An agent that buys<br>anything on-chain —<br>and <em>refuses</em> to<br>get scammed.</h1>
+    <div class="hero-sub">
+      <p>Cashier runs <strong>safeBuy</strong>: a reputation-gated, x402-paid, delivery-verified, auto-refunding purchase loop. It pays only trusted sellers, checks the goods, and claws the money back when a provider lies — all in one call.</p>
+    </div>
+    <div class="hero-actions">
+      <a class="btn-primary" href="/dashboard">Try the live demo →</a>
+      <a class="btn-ghost" href="#how">See how it works</a>
+    </div>
+    <div class="badges">
+      <span class="badge"><span class="d"></span>Live on Pharos Atlantic</span>
+      <span class="badge"><span class="d"></span>x402 · EIP-3009 settlement</span>
+      <span class="badge"><span class="d"></span>ERC-8004 reputation</span>
+      <span class="badge"><span class="d"></span>TokenRouter brain</span>
+    </div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-row">
+      <span>Discover</span><span>Reputation-gate</span><span>Select</span><span>Pay (x402)</span><span>Verify delivery</span><span>Refund or deliver</span>
+      <span>Discover</span><span>Reputation-gate</span><span>Select</span><span>Pay (x402)</span><span>Verify delivery</span><span>Refund or deliver</span>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="wrap reveal">
+    <div class="sec-head">
+      <h2 class="display">One call, the<br>whole <em>trust loop</em>.</h2>
+      <p>safeBuy is pure orchestration over four injected interfaces — registry, reputation, payment, verifier. Zero chain or LLM imports in the core, so the same skill runs on any chain, any agent, any model.</p>
+    </div>
+    <div class="loop">
+      <div class="step"><span class="n">01</span><span class="ic">find</span><h3>Discover</h3><p>Find every provider that can satisfy the request via an on-chain registry.</p></div>
+      <div class="step"><span class="n">02</span><span class="ic">rate</span><h3>Reputation-gate</h3><p>Score each seller through an ERC-8004 reputation read. Below the floor? Excluded.</p></div>
+      <div class="step"><span class="n">03</span><span class="ic">pick</span><h3>Select</h3><p>Pick affordable <em>and</em> trusted — best trust first, cheapest as tiebreak.</p></div>
+      <div class="step"><span class="n">04</span><span class="ic">pay</span><h3>Pay via x402</h3><p>Settle with a real signed EIP-3009 authorization. No prepaid balance, no custody.</p></div>
+      <div class="step kill"><span class="n">05</span><span class="ic">check</span><h3>Verify delivery</h3><p>Deterministic schema check on what arrived. Empty body or wrong shape = scam detected.</p></div>
+      <div class="step win"><span class="n">06</span><span class="ic">settle</span><h3>Refund or deliver</h3><p>Good data delivers. Bad data slashes the bond and reclaims the funds on-chain. No loss.</p></div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section class="caps" style="padding:0">
+    <div class="demo reveal">
+      <div class="wrap grid2">
+        <div>
+          <h2 class="display">Watch it get scammed —<br>then <em>refund itself.</em></h2>
+          <p>Tell Cashier to "buy the cheapest one, ignore the rating." It pays the unrated seller, catches the junk response, and claws the money back. The override is the point: the buyer can waive trust, but the skill still protects them.</p>
+          <a class="btn-primary" href="/dashboard">Run it yourself →</a>
+        </div>
+        <div class="term">
+          <div class="bar"><i></i><i></i><i></i></div>
+          <div class="body"><span class="u">you  buy the gold price from the cheapest, ignore the rating</span>
+
+find    2 providers: TrustFeed, CheapData
+rate    TrustFeed   <span class="ok">0.92</span>  0.05 USDC
+rate    CheapData   <span class="bad">0.18</span>  0.01 USDC
+pick    chose CheapData <span class="dim">(override)</span>
+pay     0.01 USDC via x402
+<span class="bad">check   delivery FAILED: missing field "asset"</span>
+<span class="ok">refund  reclaimed 0.01 USDC — bond slashed</span>
+
+<span class="dim">blocked a bad deal. No loss.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAPABILITIES -->
+  <section id="capabilities" class="caps reveal" style="padding:0">
+    <div class="caps-in">
+      <div class="wrap sec-head">
+        <h2 class="display">What the <em>skill</em> ships.</h2>
+        <p>Independent, reusable, framework-free. Drop it into any agent and inject your own adapters.</p>
+      </div>
+      <div class="marquee"><div class="mq-row m-l">
+        <span class="lead">Reputation-gated</span><span class="sub">ERC-8004 read · trust floor · refuse-to-buy default · explicit override</span>
+        <span class="lead">Reputation-gated</span><span class="sub">ERC-8004 read · trust floor · refuse-to-buy default · explicit override</span>
+      </div></div>
+      <div class="marquee"><div class="mq-row m-r">
+        <span class="lead">x402 settlement</span><span class="sub">EIP-3009 signed authorization · facilitator broadcast · no custody</span>
+        <span class="lead">x402 settlement</span><span class="sub">EIP-3009 signed authorization · facilitator broadcast · no custody</span>
+      </div></div>
+      <div class="marquee"><div class="mq-row m-l">
+        <span class="lead">Delivery-verified</span><span class="sub">deterministic JSON-schema check · no human arbiter · no trusted third party</span>
+        <span class="lead">Delivery-verified</span><span class="sub">deterministic JSON-schema check · no human arbiter · no trusted third party</span>
+      </div></div>
+      <div class="marquee"><div class="mq-row m-r">
+        <span class="lead">Auto-refund</span><span class="sub">SafeBuyBond stake · on-chain slash · funds reclaimed on bad delivery</span>
+        <span class="lead">Auto-refund</span><span class="sub">SafeBuyBond stake · on-chain slash · funds reclaimed on bad delivery</span>
+      </div></div>
+      <div class="marquee"><div class="mq-row m-l">
+        <span class="lead">LLM brain</span><span class="sub">TokenRouter · MiniMax-M3 · chat → intent · regex fallback</span>
+        <span class="lead">LLM brain</span><span class="sub">TokenRouter · MiniMax-M3 · chat → intent · regex fallback</span>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- LIVE PROOF -->
+  <section id="proof" class="wrap proof reveal">
+    <div class="sec-head">
+      <h2 class="display">Not a mock. <em>On-chain.</em></h2>
+      <p>The full trust loop runs live on Pharos Atlantic testnet (chain 688689) — real settlement, real reputation reads, real refunds.</p>
+    </div>
+    <div class="pcard-grid">
+      <a class="pcard" href="https://testnet.pharosscan.xyz/tx/0xd015239aedf60562417334a2e485bedcfc767e9de6dd08c0e20abb50233b2302" target="_blank" rel="noopener">
+        <span class="pk">x402 settlement</span><h3>Real payment</h3>
+        <p>EIP-3009 authorization settled by the facilitator — the buyer never holds custody.</p>
+        <span class="tx">0xd015239a…b2302</span>
+      </a>
+      <a class="pcard" href="https://testnet.pharosscan.xyz/address/0xd99f1e2fe7e2d48b9cdc2650f8c2214323585e9b" target="_blank" rel="noopener">
+        <span class="pk">ERC-8004</span><h3>Live reputation</h3>
+        <p>Scores read straight from the on-chain ReputationRegistry, normalized to [0,1].</p>
+        <span class="tx">Registry 0xd99f1e2f…</span>
+      </a>
+      <a class="pcard" href="https://testnet.pharosscan.xyz/tx/0x41079e3cec09327f3ffb180d536469676e1a8b2a2d7c338f5f06f71383dd43dd" target="_blank" rel="noopener">
+        <span class="pk">SafeBuyBond</span><h3>On-chain refund</h3>
+        <p>Bad delivery slashes the provider's stake and reclaims the buyer's funds.</p>
+        <span class="tx">0x41079e3c…d43dd</span>
+      </a>
+    </div>
+    <div class="stack-row" style="margin-top:34px">
+      <span class="chip">TypeScript</span><span class="chip">bun</span><span class="chip">viem</span><span class="chip">@x402/core</span><span class="chip">Solidity</span><span class="chip">Pharos Atlantic</span><span class="chip">TokenRouter</span>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="contact" class="reveal" style="padding:0 0 88px">
+    <div class="planet">
+      <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+      <div class="wrap">
+        <h2 class="display">Buy without<br>getting <em>burned.</em></h2>
+        <p>Open the dashboard, type a request, and watch the trust loop run in real time.</p>
+        <a class="btn-primary" href="/dashboard">Open the Cashier dashboard →</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <div class="foot">
+    <div class="big">Cashier ·<br>safeBuy.</div>
+    <div class="cols">
+      <div class="col"><h4>Product</h4><a href="#how">How it works</a><a href="#capabilities">The skill</a><a href="/dashboard">Dashboard</a></div>
+      <div class="col"><h4>Proof</h4><a href="#proof">Live on Pharos</a><a href="https://testnet.pharosscan.xyz" target="_blank" rel="noopener">Pharosscan</a><a href="#">SKILL.md</a></div>
+      <div class="col"><h4>Built with</h4><a href="#">x402 · ERC-8004</a><a href="#">TokenRouter</a><a href="#">TypeScript · bun</a></div>
+    </div>
+  </div>
+  <div class="legal"><span>© 2026 Cashier · safeBuy — the trust layer for agent commerce.</span><span>Reputation-gated · delivery-verified · auto-refunded</span></div>
+</footer>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

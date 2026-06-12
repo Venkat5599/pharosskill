@@ -33,11 +33,11 @@ const goldSchema: JsonSchema = {
 async function run(label: string, req: SafeBuyRequest): Promise<void> {
   console.log(`\n=== ${label} ===`);
   const r = await safeBuy(req, deps, (s) =>
-    console.log(`  ${s.ok === false ? "❌" : "•"} [${s.kind}] ${s.detail}${s.txHash ? `\n     ↳ ${EXPLORER_TX}${s.txHash}` : ""}`),
+    console.log(`  ${s.ok === false ? "" : "•"} [${s.kind}] ${s.detail}${s.txHash ? `\n     ↳ ${EXPLORER_TX}${s.txHash}` : ""}`),
   );
-  if (r.ok) console.log(`  ✅ bought from ${r.provider?.name} — ${EXPLORER_TX}${r.txHash}`);
-  else if (r.refundTxHash) console.log(`  🛡️ scammed then refunded on-chain — ${EXPLORER_TX}${r.refundTxHash}`);
-  else console.log(`  ⛔ ${r.reason}`);
+  if (r.ok) console.log(`   bought from ${r.provider?.name} — ${EXPLORER_TX}${r.txHash}`);
+  else if (r.refundTxHash) console.log(`   scammed then refunded on-chain — ${EXPLORER_TX}${r.refundTxHash}`);
+  else console.log(`   ${r.reason}`);
 }
 
 console.log(`reputation source: ${REPUTATION_REGISTRY ? "ERC-8004 registry " + REPUTATION_REGISTRY : "seeded (offline)"}`);

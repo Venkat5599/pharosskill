@@ -58,5 +58,5 @@ app.post("/settle", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`x402 facilitator live on http://localhost:${PORT}`);
   console.log(`  network ${PHAROS_NETWORK} · settler ${account.address}`);
-  console.log(funded ? "  funded settler: real /settle enabled" : "  ⚠ throwaway key: /settle will fail (set FACILITATOR_PRIVATE_KEY)");
+  console.log(funded ? "  funded settler: real /settle enabled" : "   throwaway key: /settle will fail (set FACILITATOR_PRIVATE_KEY)");
 });

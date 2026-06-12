@@ -53,7 +53,7 @@ const abi = artifact.abi;
 const bytecode = ("0x" + artifact.evm.bytecode.object) as `0x${string}`;
 
 if (!source.includes(expected.slice(2))) {
-  console.warn("⚠ contract typehash constant does not match computed value — fix SafeUSD.sol");
+  console.warn(" contract typehash constant does not match computed value — fix SafeUSD.sol");
 }
 
 // 3. deploy
@@ -73,7 +73,7 @@ const hash = await wallet.deployContract({ abi, bytecode, account, chain: pharos
 console.log("deploy tx:", hash);
 const receipt = await pub.waitForTransactionReceipt({ hash });
 const tokenAddress = receipt.contractAddress!;
-console.log("✅ SafeUSD deployed at:", tokenAddress);
+console.log(" SafeUSD deployed at:", tokenAddress);
 
 // 4. mint 1000 sUSD to the payer
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,7 +81,7 @@ const token: any = getContract({ address: tokenAddress, abi, client: wallet });
 const mintHash = await token.write.mint([account.address, parseUnits("1000", 6)]);
 await pub.waitForTransactionReceipt({ hash: mintHash });
 const bal = (await token.read.balanceOf([account.address])) as bigint;
-console.log(`✅ minted — payer sUSD balance: ${formatUnits(bal, 6)}  (mint tx ${mintHash})`);
+console.log(` minted — payer sUSD balance: ${formatUnits(bal, 6)}  (mint tx ${mintHash})`);
 
 console.log("\nAdd to .env:");
 console.log(`TEST_USDC=${tokenAddress}`);

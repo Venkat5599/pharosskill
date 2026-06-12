@@ -54,7 +54,7 @@ async function deploy(file: string, name: string, args: unknown[] = []) {
   const { abi, bytecode } = compile(file, name);
   const hash = await wallet.deployContract({ abi, bytecode, account, chain: pharosAtlantic, args });
   const r = await pub.waitForTransactionReceipt({ hash });
-  console.log(`✅ ${name} @ ${r.contractAddress}  (tx ${hash})`);
+  console.log(` ${name} @ ${r.contractAddress}  (tx ${hash})`);
   return { address: r.contractAddress!, abi };
 }
 

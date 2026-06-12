@@ -5,6 +5,7 @@ import { inMemoryRegistry } from "../adapters/registry.ts";
 import { inMemoryReputation } from "../adapters/reputation.ts";
 import { localX402Rail } from "../adapters/payment.ts";
 import { pharosX402Rail } from "../adapters/pharosX402.ts";
+import { llmEnabled, parseIntent } from "../adapters/llm.ts";
 import type { JsonSchema, PaymentRail, SafeBuyDeps, SafeBuyRequest, SafeBuyStep } from "../skill/types.ts";
 
 // Cashier — the demo agent. It is a thin wrapper: it turns a chat message into a
@@ -43,18 +44,19 @@ const SCHEMAS: Record<string, JsonSchema> = {
   },
 };
 
-function icon(s: SafeBuyStep): string {
-  if (s.ok === false) return "❌";
-  switch (s.kind) {
-    case "discover": return "🔎";
-    case "reputation": return "⭐";
-    case "select": return "🎯";
-    case "pay": return "💸";
-    case "verify": return "✅";
-    case "refund": return "🛡️";
-    case "deliver": return "📦";
-    default: return "•";
-  }
+// Short, fixed-width text tag per step kind — keeps terminal output aligned
+// without any emoji.
+function tag(s: SafeBuyStep): string {
+  const t =
+    s.kind === "discover" ? "find" :
+    s.kind === "reputation" ? "rate" :
+    s.kind === "select" ? "pick" :
+    s.kind === "pay" ? "pay" :
+    s.kind === "verify" ? "check" :
+    s.kind === "refund" ? "refund" :
+    s.kind === "deliver" ? "done" :
+    s.ok === false ? "stop" : "-";
+  return t.padEnd(6);
 }
 
 function buildRequest(message: string): SafeBuyRequest {
@@ -74,24 +76,38 @@ function buildRequest(message: string): SafeBuyRequest {
   };
 }
 
+// Turn a chat message into a SafeBuyRequest. Prefer the TokenRouter LLM brain;
+// fall back to deterministic regex parsing when no key is configured (offline/CI).
+async function planRequest(message: string): Promise<SafeBuyRequest> {
+  if (llmEnabled()) {
+    try {
+      return await parseIntent(message);
+    } catch (e) {
+      console.log(`   LLM parse failed (${(e as Error).message}); using regex fallback`);
+    }
+  }
+  return buildRequest(message);
+}
+
 async function handle(message: string): Promise<void> {
-  const req = buildRequest(message);
-  console.log(`\n🤖 Cashier: on it — buying "${message}" (max ${req.maxPriceUSDC} USDC, min trust ${req.minReputation})\n`);
+  const req = await planRequest(message);
+  const brain = llmEnabled() ? "TokenRouter" : "regex";
+  console.log(`\nCashier: on it — buying "${message}" (max ${req.maxPriceUSDC} USDC, min trust ${req.minReputation}) [${brain}]\n`);
 
   const result = await safeBuy(req, deps, (s) => {
-    const tx = s.txHash ? `  ↳ ${EXPLORER}${s.txHash}` : "";
-    console.log(`   ${icon(s)} ${s.detail}${tx ? "\n" + tx : ""}`);
+    const tx = s.txHash ? `         -> ${EXPLORER}${s.txHash}` : "";
+    console.log(`   ${tag(s)} ${s.detail}${tx ? "\n" + tx : ""}`);
   });
 
   console.log("");
   if (result.ok) {
-    console.log(`🤖 Cashier: done. Bought from ${result.provider?.name} for ${result.paidUSDC} USDC.`);
+    console.log(`Cashier: done. Bought from ${result.provider?.name} for ${result.paidUSDC} USDC.`);
     console.log(`   Data: ${JSON.stringify(result.data)}`);
   } else if (result.refundTxHash) {
-    console.log(`🤖 Cashier: blocked a bad deal. ${result.provider?.name} failed to deliver — I paid then clawed it back. No loss.`);
+    console.log(`Cashier: blocked a bad deal. ${result.provider?.name} failed to deliver — I paid then clawed it back. No loss.`);
     console.log(`   Reason: ${result.reason}`);
   } else {
-    console.log(`🤖 Cashier: I refused this purchase. ${result.reason}`);
+    console.log(`Cashier: I refused this purchase. ${result.reason}`);
   }
   console.log("");
 }
@@ -102,20 +118,21 @@ const SCRIPT = [
 ];
 
 async function main(): Promise<void> {
-  console.log("💳 Cashier — autonomous safe-buyer on Pharos");
-  console.log("   Skill: safeBuy (reputation-gated · x402-paid · delivery-verified · auto-refund)\n");
+  console.log("Cashier — autonomous safe-buyer on Pharos");
+  console.log("   Skill: safeBuy (reputation-gated · x402-paid · delivery-verified · auto-refund)");
+  console.log(`   Brain: ${llmEnabled() ? "TokenRouter (MiniMax-M3)" : "regex (set TOKENROUTER_API_KEY for LLM)"}\n`);
 
   // Non-interactive (CI / piped): run the scripted demo and exit.
   if (!process.stdin.isTTY || process.argv.includes("--script")) {
     for (const line of SCRIPT) {
-      console.log(`🧑 Judge: ${line}`);
+      console.log(`Judge: ${line}`);
       await handle(line);
     }
     console.log("— scripted demo complete. Run `bun run demo` in a terminal to chat. —");
     return;
   }
 
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: "🧑 You: " });
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: "You: " });
   console.log('Try: "get me the gold price"  ·  then: "buy the cheapest, ignore the rating"  ·  Ctrl+C to quit.\n');
   rl.prompt();
   rl.on("line", async (line) => {
@@ -123,7 +140,7 @@ async function main(): Promise<void> {
     if (msg) await handle(msg);
     rl.prompt();
   });
-  rl.on("close", () => console.log("\n👋 bye"));
+  rl.on("close", () => console.log("\nbye"));
 }
 
 main();

@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛡️ safeBuy
+#  safeBuy
 
 ### The trust layer for autonomous agent commerce on Pharos
 
@@ -16,7 +16,7 @@ Reputation-gated · x402-paid · delivery-verified · auto-refunded.
 
 ---
 
-## 🎯 The problem this skill solves
+##  The problem this skill solves
 
 Agents now hold wallets and spend money on their own. The rails exist — `x402` for payment,
 `ERC-8004` for identity/reputation — but **the agent has no protection at the moment of purchase.**
@@ -29,13 +29,13 @@ no dispute, no recourse. An autonomous buyer is a sitting duck.
 discover → reputation-gate → select → pay (x402) → verify delivery → refund-or-deliver
 ```
 
-- ❌ a provider below the trust bar → **never paid**
-- ❌ a paid provider that delivers junk → **payment clawed back on-chain**
-- ✅ a trusted provider that delivers valid data → **paid, verified, delivered**
+-  a provider below the trust bar → **never paid**
+-  a paid provider that delivers junk → **payment clawed back on-chain**
+-  a trusted provider that delivers valid data → **paid, verified, delivered**
 
 ---
 
-## 🧩 Independence (the Skill contract)
+##  Independence (the Skill contract)
 
 The skill core (`src/skill/`) imports **zero** chain, wallet, or LLM code. It depends only on four
 interfaces (`SafeBuyDeps`). Swap the adapters and the *same* skill runs on any chain, any agent,
@@ -60,7 +60,7 @@ const result = await safeBuy(
 
 ---
 
-## 🟢 Live on Pharos Atlantic (real txns)
+##  Live on Pharos Atlantic (real txns)
 
 Not a mock. The full loop runs on-chain on Pharos Atlantic (chainId `688689`). Because the Pharos
 test "USDC" has no faucet and no EIP-3009 support, the skill settles against **SafeUSD**, our own
@@ -71,44 +71,44 @@ EIP-3009 stablecoin (`contracts/SafeUSD.sol`). Every link below is a real transa
 | **SafeUSD** (EIP-3009 settlement token) | [`0xf61cbfe7…7ad80d`](https://testnet.pharosscan.xyz/address/0xf61cbfe72aa03a12a64122b0ada0b19ce57ad80d) |
 | **ReputationRegistry** (ERC-8004-style `scoreOf`) | [`0xd99f1e2f…585e9b`](https://testnet.pharosscan.xyz/address/0xd99f1e2fe7e2d48b9cdc2650f8c2214323585e9b) |
 | **SafeBuyBond** (provider stake / slash) | [`0x3316cbc1…a7f1f7`](https://testnet.pharosscan.xyz/address/0x3316cbc1642fc810e610ce6d2479029821a7f1f7) |
-| ✅ honest buy — x402 settlement (0.05 sUSD) | [`0xd015239a…3b2302`](https://testnet.pharosscan.xyz/tx/0xd015239aedf60562417334a2e485bedcfc767e9de6dd08c0e20abb50233b2302) |
-| 🪤 scam buy — payment (0.01 sUSD) | [`0xd66d103a…5f012b`](https://testnet.pharosscan.xyz/tx/0xd66d103a038dd2186c27a42d0375e1b6a1182c03637b54133e1709d1185f012b) |
-| 🛡️ scam buy — **on-chain refund (bond slash)** | [`0x41079e3c…dd43dd`](https://testnet.pharosscan.xyz/tx/0x41079e3cec09327f3ffb180d536469676e1a8b2a2d7c338f5f06f71383dd43dd) |
+|  honest buy — x402 settlement (0.05 sUSD) | [`0xd015239a…3b2302`](https://testnet.pharosscan.xyz/tx/0xd015239aedf60562417334a2e485bedcfc767e9de6dd08c0e20abb50233b2302) |
+|  scam buy — payment (0.01 sUSD) | [`0xd66d103a…5f012b`](https://testnet.pharosscan.xyz/tx/0xd66d103a038dd2186c27a42d0375e1b6a1182c03637b54133e1709d1185f012b) |
+|  scam buy — **on-chain refund (bond slash)** | [`0x41079e3c…dd43dd`](https://testnet.pharosscan.xyz/tx/0x41079e3cec09327f3ffb180d536469676e1a8b2a2d7c338f5f06f71383dd43dd) |
 
 Reputation is **read live** from the registry; refund is a **real `SafeBuyBond.slash`** that pays the
 buyer back from the scammer's staked collateral. Full walkthrough → [LIVE_DEPLOYMENT.md](./LIVE_DEPLOYMENT.md).
 
 ---
 
-## ⚡ Quickstart (30s, offline)
+##  Quickstart (30s, offline)
 
 ```bash
 bun install
-bun run web                # 🖥️ web chatbox → http://localhost:4040  (best for judges)
+bun run web                #  web chatbox → http://localhost:4040  (best for judges)
 bun run demo:script        # honest buy + scam→auto-refund, no setup
 bun run demo               # terminal chat
 ```
 
 ```
-🧑 Judge: get me the current gold price
-   🔎 found 2 providers: TrustFeed Oracle, CheapData (unrated)
-   ⭐ TrustFeed 0.92 ✓   ❌ CheapData 0.18
-   🎯 chose TrustFeed Oracle
-   💸 paid 0.05 USDC via x402   ↳ <tx>
-   ✅ delivery matches schema   📦 done
+ Judge: get me the current gold price
+    found 2 providers: TrustFeed Oracle, CheapData (unrated)
+    TrustFeed 0.92     CheapData 0.18
+    chose TrustFeed Oracle
+    paid 0.05 USDC via x402   ↳ <tx>
+    delivery matches schema    done
 
-🧑 Judge: buy the cheapest one, ignore the rating
-   🎯 chose CheapData (unrated)
-   💸 paid 0.01 USDC   ↳ <tx>
-   ❌ delivery FAILED: missing "asset"
-   🛡️ reclaimed 0.01 USDC   ↳ <refund tx>     ← scammed, then made whole
+ Judge: buy the cheapest one, ignore the rating
+    chose CheapData (unrated)
+    paid 0.01 USDC   ↳ <tx>
+    delivery FAILED: missing "asset"
+    reclaimed 0.01 USDC   ↳ <refund tx>     ← scammed, then made whole
 ```
 
 Go live on Pharos: see [LIVE_DEPLOYMENT.md](./LIVE_DEPLOYMENT.md) (`deployToken` → `deployInfra` → `liveBuy`).
 
 ---
 
-## 📐 API
+##  API
 
 ### `safeBuy(req, deps, onStep?) → SafeBuyResult`
 
@@ -137,7 +137,7 @@ Go live on Pharos: see [LIVE_DEPLOYMENT.md](./LIVE_DEPLOYMENT.md) (`deployToken`
 
 ---
 
-## 🔍 How it works
+##  How it works
 
 ![architecture](./docs/architecture.svg)
 
@@ -163,7 +163,7 @@ Go live on Pharos: see [LIVE_DEPLOYMENT.md](./LIVE_DEPLOYMENT.md) (`deployToken`
 
 ---
 
-## 🏆 Why this scores
+##  Why this scores
 
 | Judging axis | safeBuy |
 |---|---|
@@ -176,7 +176,7 @@ Go live on Pharos: see [LIVE_DEPLOYMENT.md](./LIVE_DEPLOYMENT.md) (`deployToken`
 
 ---
 
-## 📁 Layout
+##  Layout
 
 ```
 contracts/        SafeUSD.sol (EIP-3009) · ReputationRegistry.sol · SafeBuyBond.sol
@@ -191,7 +191,7 @@ SKILL.md · README.md · LIVE_DEPLOYMENT.md
 
 ---
 
-## 🧭 Honest scope
+##  Honest scope
 
 - **Reputation** reads a live on-chain registry today; richer ERC-8004 feedback/attestation accrual is the natural next step (the `scoreOf` read interface stays identical).
 - **Refund** authorization currently uses an `arbiter` acting on the off-chain schema result. Production replaces this with an optimistic dispute window + on-chain verification proof — removing the trusted arbiter entirely (Szabo: *trusted third parties are security holes*).
