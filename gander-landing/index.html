@@ -76,21 +76,39 @@
   .sec-head h2 em{font-family:"Instrument Serif",serif;font-style:italic;font-weight:400;color:var(--accent)}
 
   /* THE LOOP — step cards (CSS-built, no images) */
-  .loop{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
-  .step{grid-column:span 4;background:var(--cream);border:1px solid var(--line);border-radius:var(--r);padding:26px;position:relative;overflow:hidden;transition:transform .35s,box-shadow .35s}
-  .step:hover{transform:translateY(-6px);box-shadow:0 22px 44px -26px rgba(20,18,16,.5)}
-  .step .n{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:600;color:var(--accent)}
-  .step .ic{font:600 11px/1 "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:16px 0 16px;display:inline-block;padding:6px 10px;border:1px solid var(--line);border-radius:100px}
-  .step.kill .ic{color:var(--lime);border-color:rgba(244,239,230,.2)}
-  .step.win .ic{color:var(--ink);border-color:rgba(20,18,16,.25)}
-  .step h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:23px;letter-spacing:-.02em;margin-bottom:8px}
-  .step p{font-size:15px;line-height:1.5;color:#3a342c}
-  .step.kill{background:var(--ink);color:var(--paper)}
-  .step.kill p{color:rgba(244,239,230,.72)}
-  .step.kill .n{color:var(--lime)}
-  .step.win{background:var(--lime)}
-  @media(max-width:860px){.loop{grid-template-columns:repeat(6,1fr)}.step{grid-column:span 6}}
-  @media(max-width:520px){.step{grid-column:span 6;grid-column:1/-1}}
+  /* Sticky-stacking chapters: each step pins, the next scrolls up over it. */
+  .chapters{position:relative;padding-bottom:10vh}
+  .chapter{position:sticky;top:calc(96px + var(--i)*22px);margin-bottom:26px}
+  .chapter .panel{border-radius:30px;border:1px solid var(--line);overflow:hidden;
+    min-height:64vh;display:grid;grid-template-columns:minmax(180px,0.9fr) 1.3fr;
+    gap:clamp(20px,5vw,64px);align-items:center;padding:clamp(30px,5vw,66px);
+    box-shadow:0 -24px 70px -40px rgba(20,18,16,.55);
+    transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+  .chapter .num{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;
+    font-size:clamp(78px,15vw,200px);line-height:.82;letter-spacing:-.04em;color:var(--accent)}
+  .chapter .ic{font:600 12px/1 "JetBrains Mono",monospace;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--accent);display:inline-block;margin-top:18px;padding:8px 14px;border:1px solid var(--line);border-radius:100px}
+  .chapter h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;
+    font-size:clamp(30px,4.4vw,58px);letter-spacing:-.02em;line-height:1}
+  .chapter .ch-body{display:flex;flex-direction:column;gap:18px}
+  .chapter p{font-size:clamp(16px,1.7vw,20px);line-height:1.5;color:#3a342c;max-width:38ch}
+  .chapter p em{font-style:italic}
+  /* palette per chapter */
+  .ch-1 .panel{background:var(--cream)}
+  .ch-2 .panel{background:var(--card)}
+  .ch-3 .panel{background:#e7eff2}
+  .ch-4 .panel{background:var(--cream)}
+  .ch-5 .panel{background:var(--ink)}
+  .ch-5 .num{color:var(--lime)}.ch-5 h3{color:var(--paper)}.ch-5 p{color:rgba(244,239,230,.74)}
+  .ch-5 .ic{color:var(--lime);border-color:rgba(244,239,230,.22)}
+  .ch-6 .panel{background:var(--lime)}
+  .ch-6 .num,.ch-6 h3,.ch-6 p{color:var(--ink)}
+  .ch-6 .ic{color:var(--ink);border-color:rgba(20,18,16,.28)}
+  @media(max-width:760px){
+    .chapter{top:calc(76px + var(--i)*16px)}
+    .chapter .panel{grid-template-columns:1fr;min-height:auto;gap:14px}
+    .chapter .num{font-size:64px}
+  }
 
   /* DEMO STRIP — terminal mock */
   .demo{background:var(--ink);color:var(--paper);border-radius:40px;margin:0 14px;padding:70px 0 76px;overflow:hidden}
@@ -157,11 +175,6 @@
 
   .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s}
   .reveal.in{opacity:1;transform:none}
-  /* Awwwards-style chapter rise: each card lifts up as it enters the viewport */
-  .loop .step{opacity:0;transform:translateY(90px) scale(.97);
-    transition:opacity .8s cubic-bezier(.18,.7,.2,1),transform .8s cubic-bezier(.18,.7,.2,1)}
-  .loop .step.up{opacity:1;transform:none}
-  @media(prefers-reduced-motion:reduce){.loop .step{opacity:1;transform:none;transition:none}}
 </style>
 </head>
 <body>
@@ -213,13 +226,13 @@
       <h2 class="display">One call, the<br>whole <em>trust loop</em>.</h2>
       <p>safeBuy is pure orchestration over four injected interfaces — registry, reputation, payment, verifier. Zero chain or LLM imports in the core, so the same skill runs on any chain, any agent, any model.</p>
     </div>
-    <div class="loop">
-      <div class="step"><span class="n">01</span><span class="ic">find</span><h3>Discover</h3><p>Find every provider that can satisfy the request via an on-chain registry.</p></div>
-      <div class="step"><span class="n">02</span><span class="ic">rate</span><h3>Reputation-gate</h3><p>Score each seller through an ERC-8004 reputation read. Below the floor? Excluded.</p></div>
-      <div class="step"><span class="n">03</span><span class="ic">pick</span><h3>Select</h3><p>Pick affordable <em>and</em> trusted — best trust first, cheapest as tiebreak.</p></div>
-      <div class="step"><span class="n">04</span><span class="ic">pay</span><h3>Pay via x402</h3><p>Settle with a real signed EIP-3009 authorization. No prepaid balance, no custody.</p></div>
-      <div class="step kill"><span class="n">05</span><span class="ic">check</span><h3>Verify delivery</h3><p>Deterministic schema check on what arrived. Empty body or wrong shape = scam detected.</p></div>
-      <div class="step win"><span class="n">06</span><span class="ic">settle</span><h3>Refund or deliver</h3><p>Good data delivers. Bad data slashes the bond and reclaims the funds on-chain. No loss.</p></div>
+    <div class="chapters">
+      <div class="chapter ch-1" style="--i:0"><div class="panel"><div class="num">01</div><div class="ch-body"><h3>Discover</h3><p>Find every provider that can satisfy the request via an on-chain registry.</p><span class="ic">find</span></div></div></div>
+      <div class="chapter ch-2" style="--i:1"><div class="panel"><div class="num">02</div><div class="ch-body"><h3>Reputation-gate</h3><p>Score each seller through an ERC-8004 reputation read. Below the floor? Excluded.</p><span class="ic">rate</span></div></div></div>
+      <div class="chapter ch-3" style="--i:2"><div class="panel"><div class="num">03</div><div class="ch-body"><h3>Select</h3><p>Pick affordable <em>and</em> trusted — best trust first, cheapest as tiebreak.</p><span class="ic">pick</span></div></div></div>
+      <div class="chapter ch-4" style="--i:3"><div class="panel"><div class="num">04</div><div class="ch-body"><h3>Pay via x402</h3><p>Settle with a real signed EIP-3009 authorization. No prepaid balance, no custody.</p><span class="ic">pay</span></div></div></div>
+      <div class="chapter ch-5" style="--i:4"><div class="panel"><div class="num">05</div><div class="ch-body"><h3>Verify delivery</h3><p>Deterministic schema check on what arrived. Empty body or wrong shape = scam detected.</p><span class="ic">check</span></div></div></div>
+      <div class="chapter ch-6" style="--i:5"><div class="panel"><div class="num">06</div><div class="ch-body"><h3>Refund or deliver</h3><p>Good data delivers. Bad data slashes the bond and reclaims the funds on-chain. No loss.</p><span class="ic">settle</span></div></div></div>
     </div>
   </section>
 
@@ -337,16 +350,24 @@ pay     0.01 USDC via x402
   const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-  // Chapter-style rise: stagger each loop card up as it scrolls into view.
-  const loopIo=new IntersectionObserver((es)=>{es.forEach(e=>{
-    if(e.isIntersecting){
-      const i=[...e.target.parentNode.children].indexOf(e.target);
-      e.target.style.transitionDelay=(i%3)*90+'ms';
-      e.target.classList.add('up');
-      loopIo.unobserve(e.target);
+  // Chapters: as each pinned panel is overtaken by the next, recede it slightly
+  // (scale + dim) so the stack reads with depth.
+  const panels=[...document.querySelectorAll('.chapter')];
+  const onScroll=()=>{
+    for(let i=0;i<panels.length;i++){
+      const p=panels[i].querySelector('.panel');
+      const next=panels[i+1];
+      if(!next){p.style.transform='none';p.style.filter='none';continue;}
+      const r=next.getBoundingClientRect();
+      const vh=innerHeight;
+      // progress of the NEXT chapter rising up over this one (0..1)
+      const prog=Math.min(1,Math.max(0,(vh-r.top)/(vh*0.7)));
+      const s=1-prog*0.06, d=1-prog*0.12;
+      p.style.transform=`scale(${s})`;
+      p.style.filter=`brightness(${d})`;
     }
-  })},{threshold:.2,rootMargin:'0px 0px -8% 0px'});
-  document.querySelectorAll('.loop .step').forEach(el=>loopIo.observe(el));
+  };
+  addEventListener('scroll',onScroll,{passive:true});onScroll();
 </script>
 </body>
 </html>
