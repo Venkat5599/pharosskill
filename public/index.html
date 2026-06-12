@@ -12,55 +12,75 @@
     --ink:#141210; --paper:#f4efe6; --cream:#efe7d8; --card:#fbf8f1;
     --accent:#ff5436; --lime:#c8e64b; --sky:#7fc6e8; --warn:#d98a00;
     --line:rgba(20,18,16,.14); --muted:#7d766a;
-    --shadow:0 30px 70px -34px rgba(20,18,16,.45);
   }
-  *{box-sizing:border-box}
+  *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
-  body{
-    margin:0;background:var(--paper);color:var(--ink);
+  body{background:var(--paper);color:var(--ink);
     font-family:"Inter",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;
-    display:flex;align-items:center;justify-content:center;padding:24px;
-    background-image:radial-gradient(900px 500px at 85% -10%,rgba(200,230,75,.18),transparent 60%),radial-gradient(700px 500px at 0% 110%,rgba(255,84,54,.10),transparent 55%);
-  }
+    background-image:radial-gradient(900px 500px at 90% -10%,rgba(200,230,75,.14),transparent 60%),radial-gradient(700px 500px at -5% 110%,rgba(255,84,54,.08),transparent 55%);}
   ::selection{background:var(--accent);color:#fff}
-  a{color:inherit}
+  a{color:inherit;text-decoration:none}
   .display{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;letter-spacing:-.02em}
   .mono{font-family:"JetBrains Mono",monospace}
 
-  .app{width:min(860px,100%);height:min(88vh,860px);display:flex;flex-direction:column;
-    background:var(--card);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);overflow:hidden}
+  /* SHELL */
+  .shell{display:grid;grid-template-columns:300px 1fr;height:100vh}
 
-  /* header */
-  header{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;
-    background:linear-gradient(180deg,rgba(255,84,54,.05),transparent)}
-  .home{position:absolute;left:24px;top:22px}
-  .logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;
-    font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:20px;color:#fff;
-    background:var(--ink);position:relative}
-  .logo::after{content:"";position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
-  .ttl{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:21px;letter-spacing:-.02em}
-  .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+  /* SIDEBAR */
+  .side{border-right:1px solid var(--line);background:var(--cream);
+    display:flex;flex-direction:column;padding:22px 20px;gap:24px;overflow-y:auto}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;
+    font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:21px;color:#fff;background:var(--ink);position:relative}
+  .logo::after{content:"";position:absolute;top:9px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .brand .nm{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:20px;letter-spacing:-.02em;line-height:1}
+  .brand .tg{font-size:11.5px;color:var(--muted);margin-top:3px}
+
+  .sect h4{font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;padding-left:4px}
+  .navi{display:flex;flex-direction:column;gap:3px}
+  .navi a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:11px;font-size:14.5px;font-weight:500;color:var(--ink);transition:.15s}
+  .navi a:hover{background:var(--card)}
+  .navi a.on{background:var(--ink);color:var(--paper)}
+  .navi a .gl{font:600 10px/1 "JetBrains Mono",monospace;color:var(--accent);width:18px}
+  .navi a.on .gl{color:var(--lime)}
+
+  .loopkey{display:flex;flex-direction:column;gap:2px}
+  .loopkey .lk{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:9px;font-size:13px;color:#3a342c}
+  .loopkey .lk .t{font:600 10px/1 "JetBrains Mono",monospace;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--accent);min-width:46px;padding:4px 7px;border:1px solid var(--line);border-radius:100px;text-align:center}
+
+  .side .spacer{flex:1}
+  .status{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px}
+  .status .r{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600}
+  .status .r .d{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 4px rgba(200,230,75,.25)}
+  .status .sub{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.45}
+  .back{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--muted);transition:color .2s;padding:4px}
+  .back:hover{color:var(--accent)}
+
+  /* MAIN CHAT */
+  .main{display:flex;flex-direction:column;min-width:0}
+  .topbar{padding:18px 26px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;
+    background:var(--card)}
+  .topbar .ttl{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:19px;letter-spacing:-.02em}
+  .topbar .sub{font-size:12.5px;color:var(--muted);margin-top:1px}
   .pill{margin-left:auto;font-size:12px;color:var(--ink);border:1px solid var(--line);background:var(--cream);
     padding:7px 13px;border-radius:999px;font-weight:600;display:inline-flex;align-items:center;gap:7px}
   .pill .d{width:7px;height:7px;border-radius:50%;background:var(--lime)}
-  .back{font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;margin-right:4px;transition:color .2s}
-  .back:hover{color:var(--accent)}
 
-  /* feed */
-  .feed{flex:1;overflow-y:auto;padding:26px;display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth}
+  .feed{flex:1;overflow-y:auto;padding:30px max(28px,4vw);display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth}
   .feed::-webkit-scrollbar{width:9px}
   .feed::-webkit-scrollbar-thumb{background:rgba(20,18,16,.16);border-radius:8px}
-  .row{display:flex;gap:12px;max-width:90%}
-  .row.me{align-self:flex-end;flex-direction:row-reverse}
+  .wel{max-width:980px;margin:0 auto;width:100%}
+  .row{display:flex;gap:12px;max-width:860px;width:100%;margin:0 auto}
+  .row.me{flex-direction:row-reverse}
   .av{width:34px;height:34px;border-radius:11px;flex:0 0 34px;display:grid;place-items:center;
     font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:13px}
   .av.bot{background:var(--ink);color:#fff}
   .av.me{background:var(--cream);border:1px solid var(--line);color:var(--ink);font-size:11px;letter-spacing:.04em}
   .bubble{background:var(--cream);border:1px solid var(--line);border-radius:16px;padding:13px 16px;font-size:15px;line-height:1.55}
-  .row.me .bubble{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .row.me{margin-left:auto}.row.me .bubble{background:var(--ink);color:var(--paper);border-color:var(--ink)}
   .bubble b{font-weight:600}
 
-  /* steps */
   .steps{display:flex;flex-direction:column;gap:8px;margin-top:6px}
   .step{display:flex;gap:12px;align-items:flex-start;padding:11px 13px;border-radius:13px;
     background:var(--card);border:1px solid var(--line);opacity:0;transform:translateY(6px);animation:rise .35s forwards}
@@ -69,7 +89,7 @@
     letter-spacing:.08em;min-width:42px;padding:3px 8px;border:1px solid var(--line);border-radius:100px;text-align:center}
   .step .detail{flex:1;font-size:14.5px;line-height:1.5;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .step .tx{margin-top:5px}
-  .step .tx a{color:var(--accent);font-family:"JetBrains Mono",monospace;font-size:12px;text-decoration:none;word-break:break-all;font-weight:600}
+  .step .tx a{color:var(--accent);font-family:"JetBrains Mono",monospace;font-size:12px;word-break:break-all;font-weight:600}
   .step.bad{border-color:rgba(255,84,54,.45);background:rgba(255,84,54,.06)}
   .step.bad .ic{color:var(--accent);border-color:rgba(255,84,54,.4)}
   .step.refund{border-color:rgba(217,138,0,.4);background:rgba(217,138,0,.07)}
@@ -77,8 +97,6 @@
   .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:100px;text-transform:uppercase;letter-spacing:.05em}
   .b-ok{background:rgba(200,230,75,.35);color:#5c6b14}
   .b-no{background:rgba(255,84,54,.14);color:var(--accent)}
-
-  /* verdict */
   .verdict{margin-top:12px;padding:14px 16px;border-radius:14px;font-weight:600;font-size:15px;display:flex;gap:10px;align-items:center}
   .verdict::before{content:"";width:9px;height:9px;border-radius:50%;flex:0 0 9px}
   .verdict.ok{background:rgba(200,230,75,.22);border:1px solid rgba(200,230,75,.5);color:#4f5d12}
@@ -88,53 +106,95 @@
   .verdict.block{background:rgba(255,84,54,.08);border:1px solid rgba(255,84,54,.35);color:var(--accent)}
   .verdict.block::before{background:var(--accent)}
 
-  /* footer */
-  footer{padding:16px 20px 18px;border-top:1px solid var(--line);background:var(--paper)}
+  .composer{padding:16px max(28px,4vw) 20px;border-top:1px solid var(--line);background:var(--paper)}
+  .composer .inner{max-width:880px;margin:0 auto}
   .quick{display:flex;gap:9px;margin-bottom:11px;flex-wrap:wrap}
   .quick button{background:var(--cream);border:1px solid var(--line);color:var(--ink);
-    font-family:"Inter",sans-serif;font-weight:500;font-size:13px;padding:9px 14px;border-radius:100px;cursor:pointer;transition:.18s}
+    font-weight:500;font-size:13px;padding:9px 14px;border-radius:100px;cursor:pointer;transition:.18s}
   .quick button:hover{background:var(--ink);color:var(--paper);transform:translateY(-1px)}
   .inrow{display:flex;gap:10px}
   input{flex:1;background:var(--card);border:1px solid var(--line);color:var(--ink);
-    border-radius:14px;padding:14px 17px;font-size:14.5px;font-family:"Inter",sans-serif;outline:none;transition:border-color .2s}
+    border-radius:14px;padding:15px 18px;font-size:15px;font-family:"Inter",sans-serif;outline:none;transition:border-color .2s}
   input::placeholder{color:var(--muted)}
   input:focus{border-color:var(--accent)}
   .send{background:var(--accent);border:0;color:#fff;font-family:"Bricolage Grotesque",sans-serif;
-    font-weight:800;font-size:15px;padding:0 24px;border-radius:14px;cursor:pointer;transition:.18s}
-  .send:hover{transform:translateY(-1px)}
-  .send:disabled{opacity:.45;cursor:default;transform:none}
+    font-weight:800;font-size:15px;padding:0 26px;border-radius:14px;cursor:pointer;transition:.18s}
+  .send:hover{transform:translateY(-1px)}.send:disabled{opacity:.45;cursor:default;transform:none}
 
-  .dots span{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--muted);
-    margin:0 2px;animation:bl 1s infinite}
+  .dots span{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--muted);margin:0 2px;animation:bl 1s infinite}
   .dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
   @keyframes bl{0%,80%,100%{opacity:.25}40%{opacity:1}}
   code{background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:12.5px;font-family:"JetBrains Mono",monospace}
+
+  @media(max-width:820px){
+    .shell{grid-template-columns:1fr}
+    .side{display:none}
+  }
 </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="logo">C</div>
-      <div>
-        <div class="ttl">Cashier</div>
-        <div class="sub">safeBuy · reputation-gated · x402-paid · delivery-verified · auto-refund</div>
+  <div class="shell">
+    <!-- SIDEBAR -->
+    <aside class="side">
+      <div class="brand">
+        <div class="logo">C</div>
+        <div><div class="nm">Cashier</div><div class="tg">safeBuy agent</div></div>
       </div>
-      <div style="margin-left:auto;display:flex;align-items:center;gap:14px">
-        <a class="back" href="/">← Home</a>
+
+      <div class="sect">
+        <h4>Workspace</h4>
+        <div class="navi">
+          <a class="on" href="#" id="nav-chat"><span class="gl">&gt;_</span> Chat</a>
+          <a href="/#how"><span class="gl">01</span> How it works</a>
+          <a href="/#capabilities"><span class="gl">{}</span> The skill</a>
+          <a href="/#proof"><span class="gl">tx</span> Live proof</a>
+        </div>
+      </div>
+
+      <div class="sect">
+        <h4>The trust loop</h4>
+        <div class="loopkey">
+          <div class="lk"><span class="t">find</span> Discover</div>
+          <div class="lk"><span class="t">rate</span> Reputation-gate</div>
+          <div class="lk"><span class="t">pick</span> Select</div>
+          <div class="lk"><span class="t">pay</span> Pay via x402</div>
+          <div class="lk"><span class="t">check</span> Verify delivery</div>
+          <div class="lk"><span class="t">settle</span> Refund or deliver</div>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="status">
+        <div class="r"><span class="d"></span>Live on Pharos Atlantic</div>
+        <div class="sub">Offline demo rail — no wallet needed. Real x402 + refund run on-chain via the CLI.</div>
+      </div>
+      <a class="back" href="/">← Back to site</a>
+    </aside>
+
+    <!-- MAIN -->
+    <section class="main">
+      <div class="topbar">
+        <div>
+          <div class="ttl">Cashier</div>
+          <div class="sub">reputation-gated · x402-paid · delivery-verified · auto-refund</div>
+        </div>
         <span class="pill"><span class="d"></span>Pharos Atlantic</span>
       </div>
-    </header>
-    <div class="feed" id="feed"></div>
-    <footer>
-      <div class="quick">
-        <button data-q="get me the current gold price">buy gold price</button>
-        <button data-q="buy the cheapest one, ignore the rating">buy cheapest, ignore rating</button>
+      <div class="feed" id="feed"></div>
+      <div class="composer">
+        <div class="inner">
+          <div class="quick">
+            <button data-q="get me the current gold price">buy gold price</button>
+            <button data-q="buy the cheapest one, ignore the rating">buy cheapest, ignore rating</button>
+          </div>
+          <div class="inrow">
+            <input id="msg" placeholder="Ask Cashier to buy something…" autocomplete="off" />
+            <button class="send" id="send">Send</button>
+          </div>
+        </div>
       </div>
-      <div class="inrow">
-        <input id="msg" placeholder="Ask Cashier to buy something…" autocomplete="off" />
-        <button class="send" id="send">Send</button>
-      </div>
-    </footer>
+    </section>
   </div>
 
 <script>
