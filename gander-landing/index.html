@@ -157,6 +157,11 @@
 
   .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s}
   .reveal.in{opacity:1;transform:none}
+  /* Awwwards-style chapter rise: each card lifts up as it enters the viewport */
+  .loop .step{opacity:0;transform:translateY(90px) scale(.97);
+    transition:opacity .8s cubic-bezier(.18,.7,.2,1),transform .8s cubic-bezier(.18,.7,.2,1)}
+  .loop .step.up{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.loop .step{opacity:1;transform:none;transition:none}}
 </style>
 </head>
 <body>
@@ -180,7 +185,7 @@
     <span class="eyebrow">The trust layer for agent commerce · Pharos</span>
     <h1 class="display">An agent that buys<br>anything on-chain —<br>and <em>refuses</em> to<br>get scammed.</h1>
     <div class="hero-sub">
-      <p>Cashier runs <strong>safeBuy</strong>: a reputation-gated, x402-paid, delivery-verified, auto-refunding purchase loop. It pays only trusted sellers, checks the goods, and claws the money back when a provider lies — all in one call.</p>
+      <p>Cashier runs <strong>safeBuy</strong> — the whole trust loop in a single call. It buys only from sellers that clear an on-chain reputation gate, verifies what actually arrives, and claws the funds back automatically the moment a provider lies. <strong>No middleman. No arbiter. No bad debt.</strong></p>
     </div>
     <div class="hero-actions">
       <a class="btn-primary" href="/dashboard">Try the live demo →</a>
@@ -203,8 +208,8 @@
   </div>
 
   <!-- HOW IT WORKS -->
-  <section id="how" class="wrap reveal">
-    <div class="sec-head">
+  <section id="how" class="wrap">
+    <div class="sec-head reveal">
       <h2 class="display">One call, the<br>whole <em>trust loop</em>.</h2>
       <p>safeBuy is pure orchestration over four injected interfaces — registry, reputation, payment, verifier. Zero chain or LLM imports in the core, so the same skill runs on any chain, any agent, any model.</p>
     </div>
@@ -331,6 +336,17 @@ pay     0.01 USDC via x402
 <script>
   const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // Chapter-style rise: stagger each loop card up as it scrolls into view.
+  const loopIo=new IntersectionObserver((es)=>{es.forEach(e=>{
+    if(e.isIntersecting){
+      const i=[...e.target.parentNode.children].indexOf(e.target);
+      e.target.style.transitionDelay=(i%3)*90+'ms';
+      e.target.classList.add('up');
+      loopIo.unobserve(e.target);
+    }
+  })},{threshold:.2,rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.loop .step').forEach(el=>loopIo.observe(el));
 </script>
 </body>
 </html>
