@@ -23,7 +23,7 @@ import type {
 
 const here = dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.WEB_PORT ?? 4040);
-const EXPLORER = process.env.PHAROS_EXPLORER ?? "https://testnet.pharosscan.xyz/tx/";
+const EXPLORER = process.env.PHAROS_EXPLORER ?? "https://atlantic.pharosscan.xyz/tx/";
 
 // USE_PHAROS=1 -> the agent drives the skill against live Pharos: real x402
 // settlement, on-chain ERC-8004 reputation, real bond-slash refund. Needs a

@@ -28,7 +28,7 @@ const deps: SafeBuyDeps = {
   verifier: schemaVerifier,
 };
 
-const EXPLORER = process.env.PHAROS_EXPLORER ?? "https://testnet.pharosscan.xyz/tx/";
+const EXPLORER = process.env.PHAROS_EXPLORER ?? "https://atlantic.pharosscan.xyz/tx/";
 
 // Schemas Cashier knows how to ask for. A real agent would synthesize these.
 const SCHEMAS: Record<string, JsonSchema> = {

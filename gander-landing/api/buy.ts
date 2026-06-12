@@ -127,7 +127,7 @@ function buildRequest(message: string): SafeBuyRequest {
   return { query: message, schema, maxPriceUSDC: 0.1, minReputation: 0.5, selectBy: forceCheap ? "price" : "trust", allowUntrusted: forceCheap };
 }
 
-const EXPLORER = process.env.PHAROS_EXPLORER ?? "https://testnet.pharosscan.xyz/tx/";
+const EXPLORER = process.env.PHAROS_EXPLORER ?? "https://atlantic.pharosscan.xyz/tx/";
 
 // ---------- TokenRouter LLM brain (optional) ----------
 // When TOKENROUTER_API_KEY is set, parse the chat message into intent with an

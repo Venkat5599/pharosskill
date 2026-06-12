@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "pharos-skill-engine": {
+      "source": "PharosNetwork/pharos-skill-engine",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "199dd21da9e07fe91e3905420ea4d7cde2dd9f6d9cb3aa96aceebb7b8acc9730"
+    }
+  }
+}

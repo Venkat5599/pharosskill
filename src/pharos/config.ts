@@ -14,7 +14,7 @@ export const TOKEN_VERSION = process.env.SUSD_VERSION ?? "1";
 export const REPUTATION_REGISTRY = (process.env.REPUTATION_REGISTRY ?? "") as `0x${string}` | "";
 export const BOND_CONTRACT = (process.env.BOND_CONTRACT ?? "") as `0x${string}` | "";
 export const USDC_DECIMALS = 6;
-export const EXPLORER_TX = process.env.PHAROS_EXPLORER ?? "https://testnet.pharosscan.xyz/tx/";
+export const EXPLORER_TX = process.env.PHAROS_EXPLORER ?? "https://atlantic.pharosscan.xyz/tx/";
 
 export const pharosAtlantic = defineChain({
   id: PHAROS_CHAIN_ID,

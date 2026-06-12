@@ -68,12 +68,12 @@ EIP-3009 stablecoin (`contracts/SafeUSD.sol`). Every link below is a real transa
 
 | Component | On-chain |
 |---|---|
-| **SafeUSD** (EIP-3009 settlement token) | [`0xf61cbfe7…7ad80d`](https://testnet.pharosscan.xyz/address/0xf61cbfe72aa03a12a64122b0ada0b19ce57ad80d) |
-| **ReputationRegistry** (ERC-8004-style `scoreOf`) | [`0xd99f1e2f…585e9b`](https://testnet.pharosscan.xyz/address/0xd99f1e2fe7e2d48b9cdc2650f8c2214323585e9b) |
-| **SafeBuyBond** (provider stake / slash) | [`0x3316cbc1…a7f1f7`](https://testnet.pharosscan.xyz/address/0x3316cbc1642fc810e610ce6d2479029821a7f1f7) |
-|  honest buy — x402 settlement (0.05 sUSD) | [`0xd015239a…3b2302`](https://testnet.pharosscan.xyz/tx/0xd015239aedf60562417334a2e485bedcfc767e9de6dd08c0e20abb50233b2302) |
-|  scam buy — payment (0.01 sUSD) | [`0xd66d103a…5f012b`](https://testnet.pharosscan.xyz/tx/0xd66d103a038dd2186c27a42d0375e1b6a1182c03637b54133e1709d1185f012b) |
-|  scam buy — **on-chain refund (bond slash)** | [`0x41079e3c…dd43dd`](https://testnet.pharosscan.xyz/tx/0x41079e3cec09327f3ffb180d536469676e1a8b2a2d7c338f5f06f71383dd43dd) |
+| **SafeUSD** (EIP-3009 settlement token) | [`0xf61cbfe7…7ad80d`](https://atlantic.pharosscan.xyz/address/0xf61cbfe72aa03a12a64122b0ada0b19ce57ad80d) |
+| **ReputationRegistry** (ERC-8004-style `scoreOf`) | [`0xd99f1e2f…585e9b`](https://atlantic.pharosscan.xyz/address/0xd99f1e2fe7e2d48b9cdc2650f8c2214323585e9b) |
+| **SafeBuyBond** (provider stake / slash) | [`0x3316cbc1…a7f1f7`](https://atlantic.pharosscan.xyz/address/0x3316cbc1642fc810e610ce6d2479029821a7f1f7) |
+|  honest buy — x402 settlement (0.05 sUSD) | [`0xd015239a…3b2302`](https://atlantic.pharosscan.xyz/tx/0xd015239aedf60562417334a2e485bedcfc767e9de6dd08c0e20abb50233b2302) |
+|  scam buy — payment (0.01 sUSD) | [`0xd66d103a…5f012b`](https://atlantic.pharosscan.xyz/tx/0xd66d103a038dd2186c27a42d0375e1b6a1182c03637b54133e1709d1185f012b) |
+|  scam buy — **on-chain refund (bond slash)** | [`0x41079e3c…dd43dd`](https://atlantic.pharosscan.xyz/tx/0x41079e3cec09327f3ffb180d536469676e1a8b2a2d7c338f5f06f71383dd43dd) |
 
 Reputation is **read live** from the registry; refund is a **real `SafeBuyBond.slash`** that pays the
 buyer back from the scammer's staked collateral. Full walkthrough → [LIVE_DEPLOYMENT.md](./LIVE_DEPLOYMENT.md).

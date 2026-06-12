@@ -127,7 +127,7 @@ function buildRequest(message: string): SafeBuyRequest {
   return { query: message, schema, maxPriceUSDC: 0.1, minReputation: 0.5, selectBy: forceCheap ? "price" : "trust", allowUntrusted: forceCheap };
 }
 
-const EXPLORER = process.env.PHAROS_EXPLORER ?? "https://testnet.pharosscan.xyz/tx/";
+const EXPLORER = process.env.PHAROS_EXPLORER ?? "https://atlantic.pharosscan.xyz/tx/";
 
 interface Req { method?: string; body?: unknown }
 interface Res { status(c: number): Res; json(b: unknown): void; setHeader(k: string, v: string): void }
