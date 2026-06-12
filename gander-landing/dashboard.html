@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <title>Cashier · safeBuy — dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -97,6 +98,11 @@
   .feed::-webkit-scrollbar{width:9px}
   .feed::-webkit-scrollbar-thumb{background:rgba(20,18,16,.16);border-radius:8px}
   .wel{max-width:980px;margin:0 auto;width:100%}
+  .intro{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:18px 0 8px;margin:0 auto}
+  .loopsvg .spin{transform-origin:120px 120px;animation:spin 24s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media(prefers-reduced-motion:reduce){.loopsvg .spin{animation:none}}
+  .intro-t{font-size:clamp(22px,3vw,30px);line-height:1.05;color:var(--ink)}
   .row{display:flex;gap:12px;max-width:860px;width:100%;margin:0 auto}
   .row.me{flex-direction:row-reverse}
   .av{width:34px;height:34px;border-radius:11px;flex:0 0 34px;display:grid;place-items:center;
@@ -322,6 +328,27 @@ async function ask(message){
 send.onclick=()=>{const m=input.value.trim();if(m)ask(m);};
 input.onkeydown=e=>{if(e.key==='Enter'){const m=input.value.trim();if(m)ask(m);}};
 document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>ask(b.dataset.q));
+
+// Empty-state illustration: the trust loop as a ring of nodes.
+feed.appendChild(el(`<div class="intro">
+  <svg class="loopsvg" viewBox="0 0 240 240" width="200" height="200" aria-hidden="true">
+    <circle cx="120" cy="120" r="86" fill="none" stroke="rgba(20,18,16,.14)" stroke-width="2" stroke-dasharray="4 7"/>
+    <g class="spin">
+      <circle cx="120" cy="34"  r="11" fill="#ff5436"/>
+      <circle cx="194" cy="77"  r="11" fill="#141210"/>
+      <circle cx="194" cy="163" r="11" fill="#7fc6e8"/>
+      <circle cx="120" cy="206" r="11" fill="#c8e64b"/>
+      <circle cx="46"  cy="163" r="11" fill="#141210"/>
+      <circle cx="46"  cy="77"  r="11" fill="#ffb7c9"/>
+    </g>
+    <g transform="translate(120 120)">
+      <rect x="-26" y="-26" width="52" height="52" rx="15" fill="#141210"/>
+      <text x="0" y="7" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="26" fill="#f4efe6">C</text>
+      <circle cx="17" cy="-17" r="6" fill="#ff5436"/>
+    </g>
+  </svg>
+  <div class="intro-t display">Type a request.<br>Watch the trust loop run.</div>
+</div>`));
 
 feed.appendChild(el(`<div class="row"><div class="av bot">C</div><div class="bubble">Hi — I'm <b>Cashier</b>. I buy data &amp; services for agents on Pharos, and I <b>refuse to get scammed</b>. Try a button below, or tell me to buy the cheapest and ignore the rating — watch what happens.</div></div>`));
 
