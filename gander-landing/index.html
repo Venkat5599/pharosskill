@@ -76,22 +76,23 @@
   .sec-head h2 em{font-family:"Instrument Serif",serif;font-style:italic;font-weight:400;color:var(--accent)}
 
   /* THE LOOP — step cards (CSS-built, no images) */
-  /* Sticky-stacking chapters: each step pins, the next scrolls up over it. */
-  .chapters{position:relative;padding-bottom:10vh}
-  .chapter{position:sticky;top:calc(96px + var(--i)*22px);margin-bottom:26px}
-  .chapter .panel{border-radius:30px;border:1px solid var(--line);overflow:hidden;
-    min-height:64vh;display:grid;grid-template-columns:minmax(180px,0.9fr) 1.3fr;
-    gap:clamp(20px,5vw,64px);align-items:center;padding:clamp(30px,5vw,66px);
-    box-shadow:0 -24px 70px -40px rgba(20,18,16,.55);
-    transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+  /* Sticky-stacking chapters: each step pins full-screen, the next scrolls up over it. */
+  .chapters{position:relative;padding-bottom:6vh}
+  .chapter{position:sticky;top:0;height:100vh;display:flex;align-items:center;
+    padding-top:clamp(70px,9vh,110px)}
+  .chapter .panel{width:100%;border-radius:34px;border:1px solid var(--line);overflow:hidden;
+    height:min(74vh,720px);display:grid;grid-template-columns:minmax(220px,1fr) 1.25fr;
+    gap:clamp(24px,5vw,72px);align-items:center;padding:clamp(34px,5vw,74px);
+    box-shadow:0 40px 90px -50px rgba(20,18,16,.6);
+    transform:scale(var(--s,1));transform-origin:top center;will-change:transform}
   .chapter .num{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;
-    font-size:clamp(78px,15vw,200px);line-height:.82;letter-spacing:-.04em;color:var(--accent)}
-  .chapter .ic{font:600 12px/1 "JetBrains Mono",monospace;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--accent);display:inline-block;margin-top:18px;padding:8px 14px;border:1px solid var(--line);border-radius:100px}
+    font-size:clamp(96px,17vw,260px);line-height:.8;letter-spacing:-.045em;color:var(--accent)}
+  .chapter .ic{font:600 12px/1 "JetBrains Mono",monospace;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--accent);align-self:flex-start;padding:9px 16px;border:1px solid var(--line);border-radius:100px}
   .chapter h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;
-    font-size:clamp(30px,4.4vw,58px);letter-spacing:-.02em;line-height:1}
-  .chapter .ch-body{display:flex;flex-direction:column;gap:18px}
-  .chapter p{font-size:clamp(16px,1.7vw,20px);line-height:1.5;color:#3a342c;max-width:38ch}
+    font-size:clamp(36px,5.2vw,76px);letter-spacing:-.025em;line-height:.98}
+  .chapter .ch-body{display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+  .chapter p{font-size:clamp(17px,1.8vw,23px);line-height:1.45;color:#3a342c;max-width:34ch}
   .chapter p em{font-style:italic}
   /* palette per chapter */
   .ch-1 .panel{background:var(--cream)}
@@ -105,9 +106,9 @@
   .ch-6 .num,.ch-6 h3,.ch-6 p{color:var(--ink)}
   .ch-6 .ic{color:var(--ink);border-color:rgba(20,18,16,.28)}
   @media(max-width:760px){
-    .chapter{top:calc(76px + var(--i)*16px)}
-    .chapter .panel{grid-template-columns:1fr;min-height:auto;gap:14px}
-    .chapter .num{font-size:64px}
+    .chapter{height:auto;padding:40px 0}
+    .chapter .panel{grid-template-columns:1fr;height:auto;gap:16px;transform:none!important}
+    .chapter .num{font-size:84px}
   }
 
   /* DEMO STRIP — terminal mock */
@@ -175,9 +176,24 @@
 
   .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s}
   .reveal.in{opacity:1;transform:none}
+  /* scroll progress bar */
+  #progress{position:fixed;left:0;top:0;height:3px;width:100%;background:var(--accent);z-index:100;
+    transform:scaleX(0);transform-origin:0 50%;will-change:transform}
+  /* magnetic buttons */
+  [data-magnet]{transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+  /* hero line-by-line reveal */
+  .hero h1 .ln{display:block;overflow:hidden}
+  .hero h1 .ln > span{display:block;transform:translateY(110%);transition:transform .9s cubic-bezier(.16,.84,.3,1)}
+  .hero.lit h1 .ln:nth-child(1) > span{transition-delay:.05s}
+  .hero.lit h1 .ln:nth-child(2) > span{transition-delay:.13s}
+  .hero.lit h1 .ln:nth-child(3) > span{transition-delay:.21s}
+  .hero.lit h1 .ln:nth-child(4) > span{transition-delay:.29s}
+  .hero.lit h1 .ln > span{transform:translateY(0)}
+  @media(prefers-reduced-motion:reduce){.hero h1 .ln>span{transform:none;transition:none}}
 </style>
 </head>
 <body>
+<div id="progress"></div>
 
 <header>
   <nav class="wrap">
@@ -188,7 +204,7 @@
       <a href="#proof">Live proof</a>
       <a href="/dashboard">Dashboard</a>
     </div>
-    <a class="cta" href="/dashboard">Open Cashier →</a>
+    <a class="cta" href="/dashboard" data-magnet>Open Cashier →</a>
   </nav>
 </header>
 
@@ -196,13 +212,13 @@
   <!-- HERO -->
   <section class="hero wrap">
     <span class="eyebrow">The trust layer for agent commerce · Pharos</span>
-    <h1 class="display">An agent that buys<br>anything on-chain —<br>and <em>refuses</em> to<br>get scammed.</h1>
+    <h1 class="display"><span class="ln"><span>An agent that buys</span></span><span class="ln"><span>anything on-chain —</span></span><span class="ln"><span>and <em>refuses</em> to</span></span><span class="ln"><span>get scammed.</span></span></h1>
     <div class="hero-sub">
       <p>Cashier runs <strong>safeBuy</strong> — the whole trust loop in a single call. It buys only from sellers that clear an on-chain reputation gate, verifies what actually arrives, and claws the funds back automatically the moment a provider lies. <strong>No middleman. No arbiter. No bad debt.</strong></p>
     </div>
     <div class="hero-actions">
-      <a class="btn-primary" href="/dashboard">Try the live demo →</a>
-      <a class="btn-ghost" href="#how">See how it works</a>
+      <a class="btn-primary" href="/dashboard" data-magnet>Try the live demo →</a>
+      <a class="btn-ghost" href="#how" data-magnet>See how it works</a>
     </div>
     <div class="badges">
       <span class="badge"><span class="d"></span>Live on Pharos Atlantic</span>
@@ -350,24 +366,38 @@ pay     0.01 USDC via x402
   const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-  // Chapters: as each pinned panel is overtaken by the next, recede it slightly
-  // (scale + dim) so the stack reads with depth.
-  const panels=[...document.querySelectorAll('.chapter')];
-  const onScroll=()=>{
-    for(let i=0;i<panels.length;i++){
-      const p=panels[i].querySelector('.panel');
-      const next=panels[i+1];
-      if(!next){p.style.transform='none';p.style.filter='none';continue;}
-      const r=next.getBoundingClientRect();
-      const vh=innerHeight;
-      // progress of the NEXT chapter rising up over this one (0..1)
-      const prog=Math.min(1,Math.max(0,(vh-r.top)/(vh*0.7)));
-      const s=1-prog*0.06, d=1-prog*0.12;
-      p.style.transform=`scale(${s})`;
-      p.style.filter=`brightness(${d})`;
+  // --- Chapters depth: recede each pinned panel as the next rises over it.
+  // rAF-throttled, transform-only (GPU) for smoothness — no layout/paint per frame.
+  const chapters=[...document.querySelectorAll('.chapter')];
+  let ticking=false;
+  function frame(){
+    ticking=false;
+    const vh=innerHeight;
+    for(let i=0;i<chapters.length;i++){
+      const next=chapters[i+1];
+      const panel=chapters[i].querySelector('.panel');
+      if(!next){panel.style.setProperty('--s',1);continue;}
+      const top=next.getBoundingClientRect().top;
+      const prog=Math.min(1,Math.max(0,(vh-top)/vh));      // 0 → 1 as next covers
+      panel.style.setProperty('--s',(1-prog*0.08).toFixed(4));
     }
-  };
-  addEventListener('scroll',onScroll,{passive:true});onScroll();
+  }
+  function onScroll(){if(!ticking){ticking=true;requestAnimationFrame(frame);}}
+  addEventListener('scroll',onScroll,{passive:true});addEventListener('resize',onScroll);frame();
+
+  // --- Awwwards motion: scroll progress bar
+  const bar=document.getElementById('progress');
+  if(bar){const upd=()=>{const h=document.documentElement;bar.style.transform=`scaleX(${h.scrollTop/(h.scrollHeight-h.clientHeight||1)})`;};addEventListener('scroll',upd,{passive:true});upd();}
+
+  // --- Awwwards motion: magnetic buttons (cursor pull)
+  document.querySelectorAll('[data-magnet]').forEach(b=>{
+    b.addEventListener('pointermove',e=>{const r=b.getBoundingClientRect();
+      b.style.transform=`translate(${(e.clientX-r.left-r.width/2)*0.25}px,${(e.clientY-r.top-r.height/2)*0.35}px)`;});
+    b.addEventListener('pointerleave',()=>{b.style.transform='';});
+  });
+
+  // --- Awwwards motion: staggered hero line reveal on load
+  requestAnimationFrame(()=>document.querySelector('.hero')?.classList.add('lit'));
 </script>
 </body>
 </html>
