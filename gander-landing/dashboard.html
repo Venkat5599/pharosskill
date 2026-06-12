@@ -57,8 +57,34 @@
   .back{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--muted);transition:color .2s;padding:4px}
   .back:hover{color:var(--accent)}
 
-  /* MAIN CHAT */
+  /* MAIN */
   .main{display:flex;flex-direction:column;min-width:0}
+  .view{flex:1;min-height:0;display:none;flex-direction:column}
+  .view.on{display:flex}
+  /* doc views */
+  .doc{flex:1;overflow-y:auto;padding:40px max(28px,4vw) 70px;max-width:1040px;width:100%;margin:0 auto}
+  .doc h2{font-size:clamp(30px,4vw,52px);line-height:1.02}
+  .doc h2 em{font-family:"Instrument Serif",serif;font-style:italic;font-weight:400;color:var(--accent)}
+  .doc .lead{font-size:17px;line-height:1.55;color:#3a342c;margin:16px 0 34px;max-width:60ch}
+  .doc .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .doc .cards.two{grid-template-columns:repeat(2,1fr)}
+  .dcard{background:var(--cream);border:1px solid var(--line);border-radius:18px;padding:24px;
+    display:flex;flex-direction:column;gap:10px;transition:transform .3s,box-shadow .3s}
+  a.dcard:hover{transform:translateY(-5px);box-shadow:0 18px 40px -22px rgba(20,18,16,.5)}
+  .dcard .hd{display:flex;align-items:center;justify-content:space-between}
+  .dcard .n{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:600;color:var(--accent)}
+  .dcard .t{font:600 10px/1 "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
+    padding:6px 11px;border:1px solid var(--line);border-radius:100px}
+  .dcard h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:21px;letter-spacing:-.02em}
+  .dcard p{font-size:14.5px;line-height:1.5;color:#3a342c}
+  .dcard .pk{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+  .dcard .txa{font-family:"JetBrains Mono",monospace;font-size:12.5px;font-weight:600;color:var(--accent);word-break:break-all}
+  .dcard.dark{background:var(--ink)}.dcard.dark h3{color:var(--paper)}.dcard.dark p{color:rgba(244,239,230,.74)}
+  .dcard.dark .n,.dcard.dark .t{color:var(--lime);border-color:rgba(244,239,230,.22)}
+  .dcard.win{background:var(--lime)}.dcard.win .n,.dcard.win .t{color:var(--ink);border-color:rgba(20,18,16,.28)}
+  .stack-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+  .chip{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:600;padding:9px 15px;border-radius:100px;background:var(--cream);border:1px solid var(--line)}
+  @media(max-width:900px){.doc .cards,.doc .cards.two{grid-template-columns:1fr}}
   .topbar{padding:18px 26px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;
     background:var(--card)}
   .topbar .ttl{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:19px;letter-spacing:-.02em}
@@ -144,10 +170,10 @@
       <div class="sect">
         <h4>Workspace</h4>
         <div class="navi">
-          <a class="on" href="#" id="nav-chat"><span class="gl">&gt;_</span> Chat</a>
-          <a href="/#how"><span class="gl">01</span> How it works</a>
-          <a href="/#capabilities"><span class="gl">{}</span> The skill</a>
-          <a href="/#proof"><span class="gl">tx</span> Live proof</a>
+          <a class="on" data-view="chat"><span class="gl">&gt;_</span> Chat</a>
+          <a data-view="how"><span class="gl">01</span> How it works</a>
+          <a data-view="skill"><span class="gl">{}</span> The skill</a>
+          <a data-view="proof"><span class="gl">tx</span> Live proof</a>
         </div>
       </div>
 
@@ -181,16 +207,67 @@
         </div>
         <span class="pill"><span class="d"></span>Pharos Atlantic</span>
       </div>
-      <div class="feed" id="feed"></div>
-      <div class="composer">
-        <div class="inner">
-          <div class="quick">
-            <button data-q="get me the current gold price">buy gold price</button>
-            <button data-q="buy the cheapest one, ignore the rating">buy cheapest, ignore rating</button>
+      <!-- VIEW: CHAT -->
+      <div class="view on" id="view-chat">
+        <div class="feed" id="feed"></div>
+        <div class="composer">
+          <div class="inner">
+            <div class="quick">
+              <button data-q="get me the current gold price">buy gold price</button>
+              <button data-q="buy the cheapest one, ignore the rating">buy cheapest, ignore rating</button>
+            </div>
+            <div class="inrow">
+              <input id="msg" placeholder="Ask Cashier to buy something…" autocomplete="off" />
+              <button class="send" id="send">Send</button>
+            </div>
           </div>
-          <div class="inrow">
-            <input id="msg" placeholder="Ask Cashier to buy something…" autocomplete="off" />
-            <button class="send" id="send">Send</button>
+        </div>
+      </div>
+
+      <!-- VIEW: HOW IT WORKS -->
+      <div class="view" id="view-how">
+        <div class="doc">
+          <h2 class="display">One call, the whole <em>trust loop</em>.</h2>
+          <p class="lead">safeBuy is pure orchestration over four injected interfaces — registry, reputation, payment, verifier. Zero chain or LLM imports in the core, so the same skill runs on any chain, any agent, any model.</p>
+          <div class="cards">
+            <div class="dcard"><div class="hd"><span class="n">01</span><span class="t">find</span></div><h3>Discover</h3><p>Find every provider that can satisfy the request via an on-chain registry.</p></div>
+            <div class="dcard"><div class="hd"><span class="n">02</span><span class="t">rate</span></div><h3>Reputation-gate</h3><p>Score each seller through an ERC-8004 reputation read. Below the floor? Excluded.</p></div>
+            <div class="dcard"><div class="hd"><span class="n">03</span><span class="t">pick</span></div><h3>Select</h3><p>Pick affordable and trusted — best trust first, cheapest as tiebreak.</p></div>
+            <div class="dcard"><div class="hd"><span class="n">04</span><span class="t">pay</span></div><h3>Pay via x402</h3><p>Settle with a real signed EIP-3009 authorization. No prepaid balance, no custody.</p></div>
+            <div class="dcard dark"><div class="hd"><span class="n">05</span><span class="t">check</span></div><h3>Verify delivery</h3><p>Deterministic schema check on what arrived. Empty body or wrong shape = scam detected.</p></div>
+            <div class="dcard win"><div class="hd"><span class="n">06</span><span class="t">settle</span></div><h3>Refund or deliver</h3><p>Good data delivers. Bad data slashes the bond and reclaims the funds on-chain. No loss.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: THE SKILL -->
+      <div class="view" id="view-skill">
+        <div class="doc">
+          <h2 class="display">What the <em>skill</em> ships.</h2>
+          <p class="lead">Independent, reusable, framework-free. Drop it into any agent and inject your own adapters.</p>
+          <div class="cards two">
+            <div class="dcard"><h3>Reputation-gated</h3><p>ERC-8004 read · trust floor · refuse-to-buy default · explicit override.</p></div>
+            <div class="dcard"><h3>x402 settlement</h3><p>EIP-3009 signed authorization · facilitator broadcast · no custody.</p></div>
+            <div class="dcard"><h3>Delivery-verified</h3><p>Deterministic JSON-schema check · no human arbiter · no trusted third party.</p></div>
+            <div class="dcard"><h3>Auto-refund</h3><p>SafeBuyBond stake · on-chain slash · funds reclaimed on bad delivery.</p></div>
+            <div class="dcard"><h3>LLM brain</h3><p>TokenRouter · MiniMax-M3 · chat → intent · regex fallback.</p></div>
+            <div class="dcard"><h3>Any chain, any agent</h3><p>Core depends only on interfaces — swap adapters, same loop.</p></div>
+          </div>
+          <div class="stack-row">
+            <span class="chip">TypeScript</span><span class="chip">bun</span><span class="chip">viem</span><span class="chip">@x402/core</span><span class="chip">Solidity</span><span class="chip">Pharos Atlantic</span><span class="chip">TokenRouter</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: LIVE PROOF -->
+      <div class="view" id="view-proof">
+        <div class="doc">
+          <h2 class="display">Not a mock. <em>On-chain.</em></h2>
+          <p class="lead">The full trust loop runs live on Pharos Atlantic testnet (chain 688689) — real settlement, real reputation reads, real refunds.</p>
+          <div class="cards">
+            <a class="dcard" href="https://atlantic.pharosscan.xyz/tx/0xd015239aedf60562417334a2e485bedcfc767e9de6dd08c0e20abb50233b2302" target="_blank" rel="noopener"><span class="pk">x402 settlement</span><h3>Real payment</h3><p>EIP-3009 authorization settled by the facilitator — the buyer never holds custody.</p><span class="txa">0xd015239a…b2302 →</span></a>
+            <a class="dcard" href="https://atlantic.pharosscan.xyz/address/0xd99f1e2fe7e2d48b9cdc2650f8c2214323585e9b" target="_blank" rel="noopener"><span class="pk">ERC-8004</span><h3>Live reputation</h3><p>Scores read straight from the on-chain ReputationRegistry, normalized to [0,1].</p><span class="txa">Registry 0xd99f1e2f… →</span></a>
+            <a class="dcard" href="https://atlantic.pharosscan.xyz/tx/0x41079e3cec09327f3ffb180d536469676e1a8b2a2d7c338f5f06f71383dd43dd" target="_blank" rel="noopener"><span class="pk">SafeBuyBond</span><h3>On-chain refund</h3><p>Bad delivery slashes the provider's stake and reclaims the buyer's funds.</p><span class="txa">0x41079e3c…d43dd →</span></a>
           </div>
         </div>
       </div>
@@ -247,6 +324,17 @@ input.onkeydown=e=>{if(e.key==='Enter'){const m=input.value.trim();if(m)ask(m);}
 document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>ask(b.dataset.q));
 
 feed.appendChild(el(`<div class="row"><div class="av bot">C</div><div class="bubble">Hi — I'm <b>Cashier</b>. I buy data &amp; services for agents on Pharos, and I <b>refuse to get scammed</b>. Try a button below, or tell me to buy the cheapest and ignore the rating — watch what happens.</div></div>`));
+
+// In-dashboard view switching — sidebar nav swaps the main pane, no page nav.
+const navItems=document.querySelectorAll('.navi a[data-view]');
+const views={chat:'view-chat',how:'view-how',skill:'view-skill',proof:'view-proof'};
+navItems.forEach(a=>a.addEventListener('click',e=>{
+  e.preventDefault();
+  navItems.forEach(n=>n.classList.remove('on'));
+  a.classList.add('on');
+  Object.values(views).forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById(views[a.dataset.view]).classList.add('on');
+}));
 </script>
 </body>
 </html>
