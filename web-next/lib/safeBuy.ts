@@ -204,10 +204,18 @@ export function looksLikeBuy(message: string): boolean {
   return /\b(buy|purchase|get|fetch|price|rate|quote|order)\b/i.test(message);
 }
 
+// Trust-waiving is a SECURITY decision — derive it from the user's actual words,
+// never from the LLM (a model that loosely sets allowUntrusted would silently
+// route buyers to scam providers). Only an explicit "cheapest/ignore rating"
+// waives the reputation gate.
+export function wantsCheap(message: string): boolean {
+  return /cheapest|ignore.*rat|allow.*untrust|no matter|unrated/i.test(message.toLowerCase());
+}
+
 export function buildRequest(message: string): SafeBuyRequest {
   const m = message.toLowerCase();
   const schema = m.includes("fx") || m.includes("eur") ? SCHEMAS.fx! : SCHEMAS.gold!;
-  const forceCheap = /cheapest|ignore.*rat|allow.*untrust|no matter/.test(m);
+  const forceCheap = wantsCheap(message);
   return {
     query: message,
     schema,
@@ -263,10 +271,11 @@ export async function planRequest(message: string): Promise<SafeBuyRequest> {
     return {
       query: message,
       schema,
-      maxPriceUSDC: typeof raw.maxPriceUSDC === "number" ? raw.maxPriceUSDC : 0.1,
+      maxPriceUSDC: typeof raw.maxPriceUSDC === "number" && raw.maxPriceUSDC > 0 ? raw.maxPriceUSDC : 0.1,
       minReputation: typeof raw.minReputation === "number" ? raw.minReputation : 0.5,
-      selectBy: raw.selectBy === "price" ? "price" : "trust",
-      allowUntrusted: Boolean(raw.allowUntrusted),
+      // trust-waiving is deterministic, NOT model-controlled (see wantsCheap)
+      selectBy: wantsCheap(message) ? "price" : "trust",
+      allowUntrusted: wantsCheap(message),
     };
   } catch {
     return buildRequest(message); // any failure -> deterministic regex

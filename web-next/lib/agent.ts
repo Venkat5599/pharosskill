@@ -4,7 +4,7 @@
 // the real safeBuy trust loop as a tool. RAG (knowledge) + skill (action).
 
 import { retrieve } from "@/lib/rag";
-import { buildRequest, EXPLORER, looksLikeBuy, SCHEMAS, safeBuy, type JsonSchema, type SafeBuyRequest } from "@/lib/safeBuy";
+import { buildRequest, EXPLORER, looksLikeBuy, SCHEMAS, safeBuy, wantsCheap, type JsonSchema, type SafeBuyRequest } from "@/lib/safeBuy";
 
 const TR_BASE = process.env.TOKENROUTER_BASE_URL ?? "https://api.aicredits.in/v1";
 const TR_MODEL = process.env.TOKENROUTER_MODEL ?? "deepseek/deepseek-v4-flash";
@@ -118,10 +118,11 @@ export async function runAgent(message: string): Promise<AgentReply> {
     const req: SafeBuyRequest = {
       query: message,
       schema,
-      maxPriceUSDC: typeof it.maxPriceUSDC === "number" ? it.maxPriceUSDC : 0.1,
+      maxPriceUSDC: typeof it.maxPriceUSDC === "number" && it.maxPriceUSDC > 0 ? it.maxPriceUSDC : 0.1,
       minReputation: typeof it.minReputation === "number" ? it.minReputation : 0.5,
-      selectBy: it.selectBy === "price" ? "price" : "trust",
-      allowUntrusted: Boolean(it.allowUntrusted),
+      // trust-waiving is deterministic, NOT model-controlled
+      selectBy: wantsCheap(message) ? "price" : "trust",
+      allowUntrusted: wantsCheap(message),
     };
     return { type: "buy", explorer: EXPLORER, buy: safeBuy(req), sources };
   }
