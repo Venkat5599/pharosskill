@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { connect as walletConnect, hasWallet, signAuthorization } from "@/lib/wallet";
 
 const LINE = "border-[color:var(--line)]";
 
@@ -37,11 +36,21 @@ interface BuyResult {
   real?: boolean;
   reason?: string;
 }
+interface AgentReply {
+  type: "answer" | "buy" | "error";
+  answer?: string;
+  spans?: string[];
+  sources?: string[];
+  hops?: number;
+  explorer?: string;
+  buy?: BuyResult;
+  error?: string;
+}
 interface Msg {
   id: number;
   role: "user" | "bot";
   text?: string;
-  data?: BuyResult | "error";
+  reply?: AgentReply | "error";
 }
 
 const NAV: { v: View; gl: string; label: string }[] = [
@@ -69,7 +78,6 @@ export default function Dashboard() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
-  const [account, setAccount] = useState<string | null>(null);
   const feedRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -77,45 +85,21 @@ export default function Dashboard() {
     feedRef.current?.scrollTo({ top: feedRef.current.scrollHeight });
   }, [msgs]);
 
-  async function onConnect() {
-    try {
-      setAccount(await walletConnect());
-    } catch (e) {
-      alert((e as Error).message);
-    }
-  }
-
-  // Real wallet rail: plan (server selects) -> buyer signs EIP-3009 (gasless) ->
-  // settle (facilitator broadcasts) -> real on-chain tx. Falls back to the
-  // simulated rail (/api/buy) when no wallet is connected.
-  async function realBuy(message: string): Promise<BuyResult> {
-    const plan = (await (await fetch("/api/plan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message }) })).json()) as
-      | { ok: true; steps: Step[]; pick: { agentAddress: string; valueAtomic: string } }
-      | { ok: false; reason?: string; steps?: Step[] };
-    if (!plan.ok) return { explorer: "", ok: false, steps: plan.steps ?? [{ kind: "abort", detail: plan.reason ?? "refused", ok: false }], reason: plan.reason };
-    const auth = await signAuthorization(account!, plan.pick.agentAddress, plan.pick.valueAtomic);
-    const res = (await (await fetch("/api/settle", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message, auth }) })).json()) as BuyResult & { error?: string };
-    if (!res.steps) return { explorer: "", ok: false, steps: [...plan.steps, { kind: "abort", detail: res.error ?? "settlement failed", ok: false }], reason: res.error };
-    return res;
-  }
-
+  // One brain: the smart agent (lib/ragAgent) decides answer-vs-buy. Doc
+  // questions get a grounded answer; a buy request runs the real on-chain loop.
   async function ask(message: string) {
     if (busy) return;
     setBusy(true);
     setInput("");
     setMsgs((m) => [...m, { id: ++uid, role: "user", text: message }]);
-    let data: BuyResult | "error";
+    let reply: AgentReply | "error";
     try {
-      if (account) {
-        data = await realBuy(message);
-      } else {
-        const r = await fetch("/api/buy", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message }) });
-        data = (await r.json()) as BuyResult;
-      }
-    } catch (e) {
-      data = { explorer: "", ok: false, steps: [{ kind: "abort", detail: `wallet: ${(e as Error).message}`, ok: false }], reason: (e as Error).message } as BuyResult;
+      const r = await fetch("/api/agent", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message }) });
+      reply = (await r.json()) as AgentReply;
+    } catch {
+      reply = "error";
     }
-    setMsgs((m) => [...m, { id: ++uid, role: "bot", data }]);
+    setMsgs((m) => [...m, { id: ++uid, role: "bot", reply }]);
   }
 
   function submit() {
@@ -185,15 +169,9 @@ export default function Dashboard() {
             <div className="font-display text-[19px] tracking-[-.02em]">Cashier</div>
             <div className="mt-px text-[12.5px] text-muted">reputation-gated · x402-paid · delivery-verified · auto-refund</div>
           </div>
-          {account ? (
-            <span className={`ml-auto inline-flex items-center gap-[7px] rounded-full border ${LINE} bg-cream px-[13px] py-[7px] font-mono text-[12px] font-semibold text-ink`}>
-              <span className="h-[7px] w-[7px] rounded-full bg-lime" />{account.slice(0, 6)}…{account.slice(-4)} · live
-            </span>
-          ) : (
-            <button onClick={onConnect} className="ml-auto rounded-full bg-ink px-[15px] py-[8px] text-[12.5px] font-semibold text-paper transition hover:bg-accent" title={hasWallet() ? "Pay real x402 from your wallet" : "Install a wallet to pay on-chain"}>
-              {hasWallet() ? "Connect wallet" : "No wallet"}
-            </button>
-          )}
+          <span className={`ml-auto inline-flex items-center gap-[7px] rounded-full border ${LINE} bg-cream px-[13px] py-[7px] text-[12px] font-semibold text-ink`}>
+            <span className="h-[7px] w-[7px] rounded-full bg-lime" />Pharos Atlantic
+          </span>
         </div>
 
         {view === "chat" && <ChatView msgs={msgs} feedRef={feedRef} inputRef={inputRef} input={input} setInput={setInput} submit={submit} busy={busy} ask={ask} onDone={() => { setBusy(false); inputRef.current?.focus(); }} />}
@@ -237,18 +215,18 @@ function ChatView({ msgs, feedRef, inputRef, input, setInput, submit, busy, ask,
               <circle cx="17" cy="-17" r="6" fill="#ff5436" />
             </g>
           </svg>
-          <div className="font-display text-[clamp(22px,3vw,30px)] leading-[1.05]">Type a request.<br />Watch the trust loop run.</div>
+          <div className="font-display text-[clamp(22px,3vw,30px)] leading-[1.05]">Ask anything, or tell me to buy.<br />Watch the trust loop run.</div>
         </div>
 
         <Row bot>
-          Hi — I&apos;m <b className="font-semibold">Cashier</b>. I buy data &amp; services for agents on Pharos, and I <b className="font-semibold">refuse to get scammed</b>. Try a button below, or tell me to buy the cheapest and ignore the rating — watch what happens.
+          Hi — I&apos;m <b className="font-semibold">Cashier</b>. Ask me how safeBuy works, or tell me to buy data &amp; services for agents on Pharos — I <b className="font-semibold">refuse to get scammed</b>. Try a button below, or tell me to buy the cheapest and ignore the rating.
         </Row>
 
         {msgs.map((m) =>
           m.role === "user" ? (
             <Row key={m.id} me>{m.text}</Row>
           ) : (
-            <BotResponse key={m.id} data={m.data!} onDone={onDone} />
+            <BotResponse key={m.id} reply={m.reply!} onDone={onDone} />
           ),
         )}
       </div>
@@ -257,6 +235,7 @@ function ChatView({ msgs, feedRef, inputRef, input, setInput, submit, busy, ask,
         <div className="mx-auto max-w-[880px]">
           <div className="mb-[11px] flex flex-wrap gap-[9px]">
             {[
+              ["How does the bond-slash refund work without a trusted arbiter?", "how does it work?"],
               ["get me the current gold price", "buy gold price"],
               ["buy the cheapest one, ignore the rating", "buy cheapest, ignore rating"],
             ].map(([q, label]) => (
@@ -269,7 +248,7 @@ function ChatView({ msgs, feedRef, inputRef, input, setInput, submit, busy, ask,
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
-              placeholder="Ask Cashier to buy something…"
+              placeholder="Ask about safeBuy, or tell Cashier to buy…"
               autoComplete="off"
               className={`flex-1 rounded-[14px] border ${LINE} bg-card px-[18px] py-[15px] text-[15px] outline-none transition-colors duration-200 placeholder:text-muted focus:border-accent`}
             />
@@ -291,46 +270,77 @@ function Row({ children, me, bot }: { children: React.ReactNode; me?: boolean; b
   );
 }
 
-function BotResponse({ data, onDone }: { data: BuyResult | "error"; onDone: () => void }) {
+function BotResponse({ reply, onDone }: { reply: AgentReply | "error"; onDone: () => void }) {
   const [thinking, setThinking] = useState(true);
   const [shown, setShown] = useState(0);
   const [verdict, setVerdict] = useState(false);
+  const isBuy = reply !== "error" && reply.type === "buy" && reply.buy;
+  const data = isBuy ? (reply as AgentReply).buy! : null;
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      if (data === "error") {
-        onDone();
-        return;
-      }
       await sleep(450);
       if (cancelled) return;
       setThinking(false);
-      for (let i = 0; i < data.steps.length; i++) {
-        await sleep(620);
-        if (cancelled) return;
-        setShown(i + 1);
+      if (data) {
+        for (let i = 0; i < data.steps.length; i++) {
+          await sleep(620);
+          if (cancelled) return;
+          setShown(i + 1);
+        }
+        setVerdict(true);
       }
-      setVerdict(true);
       onDone();
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (data === "error") {
+  if (reply === "error") return <Row bot><span className="text-accent">network error</span></Row>;
+
+  // ANSWER (doc question, grounded)
+  if (reply.type === "answer" || reply.type === "error") {
     return (
-      <Row bot><span className="network-error">network error</span></Row>
+      <div className="mx-auto flex w-full max-w-[860px] gap-3">
+        <div className="grid h-[34px] w-[34px] flex-[0_0_34px] place-items-center rounded-[11px] bg-ink font-display text-[13px] text-white">C</div>
+        <div className={`rounded-2xl border px-4 py-[13px] text-[15px] leading-[1.55] ${LINE} bg-cream`}>
+          {thinking ? (
+            <span className="dots">
+              <span className="mx-[2px] inline-block h-[7px] w-[7px] rounded-full bg-muted [animation:bl_1s_infinite]" />
+              <span className="mx-[2px] inline-block h-[7px] w-[7px] rounded-full bg-muted [animation:bl_1s_infinite_.2s]" />
+              <span className="mx-[2px] inline-block h-[7px] w-[7px] rounded-full bg-muted [animation:bl_1s_infinite_.4s]" />
+            </span>
+          ) : reply.type === "error" ? (
+            <span className="text-accent">{reply.error}</span>
+          ) : (
+            <>
+              <p className="whitespace-pre-wrap">{reply.answer}</p>
+              {reply.spans && reply.spans.length > 0 && (
+                <div className="mt-3 flex flex-col gap-[6px] border-l-2 border-[color:var(--line)] pl-3">
+                  {reply.spans.map((s, i) => <p key={i} className="text-[13px] italic leading-[1.5] text-muted">“{s}”</p>)}
+                </div>
+              )}
+              {reply.sources && reply.sources.length > 0 && (
+                <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[color:var(--line)] pt-[10px]">
+                  <span className="text-[11px] font-bold uppercase tracking-[.1em] text-muted">sources</span>
+                  {reply.sources.map((s) => <span key={s} className={`rounded-full border ${LINE} bg-card px-[10px] py-[4px] font-mono text-[11.5px] text-ink-soft`}>{s}</span>)}
+                  {typeof reply.hops === "number" && <span className="rounded-full border border-[color:var(--line)] bg-card px-[9px] py-[3px] font-mono text-[10px] uppercase tracking-[.1em] text-muted">hybrid · rerank{reply.hops > 1 ? ` · ${reply.hops} hops` : ""}</span>}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     );
   }
 
+  // BUY (trust loop)
   return (
     <div className="mx-auto flex w-full max-w-[860px] gap-3">
       <div className="grid h-[34px] w-[34px] flex-[0_0_34px] place-items-center rounded-[11px] bg-ink font-display text-[13px] text-white">C</div>
       <div className={`rounded-2xl border px-4 py-[13px] text-[15px] leading-[1.55] ${LINE} bg-cream`}>
-        {thinking ? (
+        {thinking || !data ? (
           <span className="dots">
             <span className="mx-[2px] inline-block h-[7px] w-[7px] rounded-full bg-muted [animation:bl_1s_infinite]" />
             <span className="mx-[2px] inline-block h-[7px] w-[7px] rounded-full bg-muted [animation:bl_1s_infinite_.2s]" />
