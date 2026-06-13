@@ -15,6 +15,8 @@ interface BuyResult { ok: boolean; steps: Step[]; provider?: { name?: string }; 
 interface AgentReply {
   type: "answer" | "buy" | "error";
   answer?: string;
+  spans?: string[];
+  hops?: number;
   sources?: string[];
   explorer?: string;
   buy?: BuyResult;
@@ -154,7 +156,19 @@ function AgentMsg({ reply }: { reply: AgentReply }) {
         {reply.type === "answer" && (
           <>
             <p className="whitespace-pre-wrap">{reply.answer}</p>
+            {reply.spans && reply.spans.length > 0 && (
+              <div className="mt-3 flex flex-col gap-[6px] border-l-2 border-[color:var(--line)] pl-3">
+                {reply.spans.map((s, i) => (
+                  <p key={i} className="text-[13px] italic leading-[1.5] text-muted">“{s}”</p>
+                ))}
+              </div>
+            )}
             <Sources sources={reply.sources} />
+            {typeof reply.hops === "number" && (
+              <span className="mt-2 inline-block rounded-full border border-[color:var(--line)] bg-card px-[9px] py-[3px] font-mono text-[10px] uppercase tracking-[.1em] text-muted">
+                hybrid · rerank{reply.hops > 1 ? ` · ${reply.hops} hops` : ""}
+              </span>
+            )}
           </>
         )}
 
