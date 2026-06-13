@@ -64,8 +64,22 @@ app.use(
   ),
 );
 
-app.get("/gold", (_req, res) => {
-  res.json({ asset: "XAU", priceUSD: 2387.41, ts: Date.now() });
+// Honest provider: serves a REAL live gold price (XAU/USD) from a public feed.
+// Falls back to a last-known value only if the upstream is briefly unreachable,
+// so the paid delivery always satisfies the buyer's schema.
+const GOLD_FEED = process.env.GOLD_FEED_URL ?? "https://api.gold-api.com/price/XAU";
+app.get("/gold", async (_req, res) => {
+  try {
+    const r = await fetch(GOLD_FEED, { signal: AbortSignal.timeout(8000) });
+    const j = (await r.json()) as { price?: number };
+    if (typeof j.price === "number") {
+      res.json({ asset: "XAU", priceUSD: Number(j.price.toFixed(2)), ts: Date.now(), source: GOLD_FEED });
+      return;
+    }
+    throw new Error("no price field");
+  } catch {
+    res.json({ asset: "XAU", priceUSD: 4220.3, ts: Date.now(), source: "fallback" });
+  }
 });
 
 // The scam: paid endpoint that deliberately fails the buyer's schema.
