@@ -70,3 +70,18 @@ bun run src/pharos/liveBuy.ts
 `slash` is authorized by an `arbiter` (the safeBuy agent) acting on the off-chain
 schema-verification result. Production would replace this with an optimistic
 dispute window + on-chain verification proof, removing the trusted arbiter.
+
+## Live MCP buys — real on-chain (2026-06-13)
+
+The MCP server (`http://187.127.137.136:4030/mcp`) settles real x402 EIP-3009
+payments on Pharos Atlantic. Verified tx (all status `success`):
+
+| What | Tx |
+|---|---|
+| Mint 100 sUSD → payer | [`0x3d89154c…abcbca7`](https://atlantic.pharosscan.xyz/tx/0x3d89154c2de8882984d3ce5a69eb9f66963630020eef73fb86408ce41abcbca7) |
+| Honest buy (TrustFeed, delivered XAU) | [`0xf0b7fd24…ee91a36`](https://atlantic.pharosscan.xyz/tx/0xf0b7fd24b73d17ce4c649a7b409ea59e1203736b4a66da80a74b1b1ceee91a36) |
+| Scam buy settle (CheapData) | [`0xa26a1c9d…393f2e2`](https://atlantic.pharosscan.xyz/tx/0xa26a1c9dcdccad3b49c3857ef8955907628027be1bd3b2e9bf3cefa51393f2e2) |
+
+Balances after: payer 99.94 sUSD, provider 0.06 sUSD. The scam buy settled but
+did NOT auto-refund (no `BOND_CONTRACT` deployed for these addresses) — refund
+needs the SafeBuyBond infra wired (see `deployInfra.ts`).
