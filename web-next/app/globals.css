@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #141210;
+  --color-ink-soft: #3a342c;
+  --color-paper: #f4efe6;
+  --color-cream: #efe7d8;
+  --color-card: #fbf8f1;
+  --color-accent: #ff5436;
+  --color-lime: #c8e64b;
+  --color-sky: #7fc6e8;
+  --color-pink: #ffb7c9;
+  --color-warn: #d98a00;
+  --color-muted: #7d766a;
+
+  --font-display: var(--font-bricolage), sans-serif;
+  --font-serif: var(--font-instrument), serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), monospace;
+}
+
+/* line color used everywhere as a custom property */
+:root {
+  --line: rgba(20, 18, 16, 0.14);
+}
+
+/* NOTE: do NOT add an unlayered `* { margin:0; padding:0 }` reset here.
+   Tailwind v4 utilities live in @layer, and unlayered rules beat every layer —
+   such a reset silently kills all padding/margin utilities (px-*, py-*, mx-auto).
+   Tailwind's preflight already resets margins + sets box-sizing: border-box. */
+html {
+  scroll-behavior: smooth;
+}
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---- typography helpers ---- */
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.font-serif-i {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* ---- keyframes (referenced via Tailwind arbitrary animate-[...] or classes) ---- */
+@keyframes wob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.15); }
+}
+@keyframes scroll {
+  to { transform: translateX(-50%); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes rise {
+  to { opacity: 1; transform: none; }
+}
+@keyframes bl {
+  0%, 80%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+
+/* ---- scroll-reveal (IntersectionObserver toggles .in) ---- */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.7s, transform 0.7s;
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- hero line-by-line reveal ---- */
+.hero h1 .ln {
+  display: block;
+  overflow: hidden;
+}
+.hero h1 .ln > span {
+  display: block;
+  transform: translateY(110%);
+  transition: transform 0.9s cubic-bezier(0.16, 0.84, 0.3, 1);
+}
+.hero.lit h1 .ln:nth-child(1) > span { transition-delay: 0.05s; }
+.hero.lit h1 .ln:nth-child(2) > span { transition-delay: 0.13s; }
+.hero.lit h1 .ln:nth-child(3) > span { transition-delay: 0.21s; }
+.hero.lit h1 .ln:nth-child(4) > span { transition-delay: 0.29s; }
+.hero.lit h1 .ln > span { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .hero h1 .ln > span { transform: none; transition: none; }
+  .loopsvg .spin { animation: none; }
+}
+
+/* magnetic buttons */
+[data-magnet] {
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* chapters: sticky-stacking depth (scale driven by JS via --s) */
+.chapter .panel {
+  transform: scale(var(--s, 1));
+  transform-origin: top center;
+  will-change: transform;
+}
+@media (max-width: 760px) {
+  .chapter .panel { transform: none !important; }
+}
+
+/* step rise-in (dashboard) */
+.step {
+  opacity: 0;
+  transform: translateY(6px);
+  animation: rise 0.35s forwards;
+}
+
+/* spinning loop svg */
+.loopsvg .spin {
+  transform-origin: 120px 120px;
+  animation: spin 24s linear infinite;
+}
+
+/* feed scrollbar */
+.feed::-webkit-scrollbar { width: 9px; }
+.feed::-webkit-scrollbar-thumb {
+  background: rgba(20, 18, 16, 0.16);
+  border-radius: 8px;
+}
