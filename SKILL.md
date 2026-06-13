@@ -207,7 +207,7 @@ safeBuy is consumable three ways, all over the same framework-free core:
 ##  Honest scope
 
 - **Reputation** reads a live on-chain registry today; richer ERC-8004 feedback/attestation accrual is the natural next step (the `scoreOf` read interface stays identical).
-- **Refund** authorization currently uses an `arbiter` acting on the off-chain schema result. Production replaces this with an optimistic dispute window + on-chain verification proof — removing the trusted arbiter entirely (Szabo: *trusted third parties are security holes*).
+- **Refund** ships in two forms. V1 `SafeBuyBond.slash` is arbiter-authorized (fast path). **V2 `SafeBuyBondV2` is trustless and live** (`contracts/SafeBuyBondV2.sol`): the provider EIP-191-signs each delivery, and `slashWithProof` itself verifies on-chain that (1) the provider signed the response and (2) the signed response is missing the required schema field — then anyone can trigger the refund. No arbiter, no discretion. An honest, schema-satisfying delivery **cannot** be slashed (the call reverts). Proven on-chain: scam-signed delivery slashed (real tx), honest-signed delivery reverted. (Szabo: *trusted third parties are security holes* — so we removed it.)
 
 <div align="center">
 

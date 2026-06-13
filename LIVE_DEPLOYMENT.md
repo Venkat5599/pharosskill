@@ -117,3 +117,19 @@ Three demoable paths, all real on-chain:
 1. **Honest** — live rep 0.92 ≥ floor → real x402 settle → schema verify → deliver.
 2. **Rep-gate refusal** — live rep 0.18 < 0.5 → refuses, NO payment made.
 3. **Scam + override** — real settle → schema fail → real bond-slash refund.
+
+### Trustless slash — arbiter removed (V2, 2026-06-13)
+
+`SafeBuyBondV2` (`contracts/SafeBuyBondV2.sol`) verifies the refund on-chain
+instead of trusting an arbiter. The provider EIP-191-signs its delivery;
+`slashWithProof` recovers the signer (must be the provider) AND checks the signed
+response is missing the required field — only then slashes. Permissionless.
+
+| What | Tx / Addr |
+|---|---|
+| SafeBuyBondV2 | `0xfcbf7bd428d46daf889eac384d7cdd8181aae4b7` |
+| Scam-signed delivery → trustless slash (real refund) | [`0xd200dc0d…077939e32`](https://atlantic.pharosscan.xyz/tx/0xd200dc0db5ce16d60a4ed327e8eae86960e882256471f4f65170363077939e32) |
+| Honest-signed delivery → slash **reverts** | `"delivery satisfies schema"` (contract protects honest provider) |
+
+Proven on-chain: a scammer's own signature convicts it; an honest provider is
+mathematically un-slashable. The trusted third party is gone.
