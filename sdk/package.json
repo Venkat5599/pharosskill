@@ -1,0 +1,12 @@
+{
+  "name": "@cashier/safebuy-sdk",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "safeBuy SDK — reputation-gated, x402-paid, delivery-verified, auto-refunding purchases for autonomous agents on Pharos. Inject your own adapters or use the real Pharos Atlantic rail.",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "files": ["index.ts", "createSafeBuy.ts", "README.md"],
+  "keywords": ["x402", "pharos", "erc-8004", "agent", "payments", "eip-3009", "safebuy"],
+  "license": "MIT"
+}

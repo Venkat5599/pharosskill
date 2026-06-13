@@ -9,9 +9,11 @@
     "facilitator": "bun run src/pharos/facilitator.ts",
     "provider": "bun run src/pharos/provider.ts",
     "web": "bun run src/web/server.ts",
+    "mcp": "bun run mcp/server.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@types/express": "^5.0.6",
     "@x402/core": "^2.14.0",
     "@x402/evm": "^2.14.0",
@@ -19,7 +21,8 @@
     "@x402/fetch": "^2.14.0",
     "express": "^5.2.1",
     "solc": "^0.8.35",
-    "viem": "^2.21.0"
+    "viem": "^2.21.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "typescript": "^5.6.0",
