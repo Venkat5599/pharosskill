@@ -85,3 +85,18 @@ payments on Pharos Atlantic. Verified tx (all status `success`):
 Balances after: payer 99.94 sUSD, provider 0.06 sUSD. The scam buy settled but
 did NOT auto-refund (no `BOND_CONTRACT` deployed for these addresses) — refund
 needs the SafeBuyBond infra wired (see `deployInfra.ts`).
+
+### Real bond-slash refund (complete loop, 2026-06-13)
+
+SafeBuyBond deployed live + wired into the MCP. A scam delivery now triggers a
+REAL on-chain clawback — buyer made whole, no mocks anywhere in the loop.
+
+| What | Tx |
+|---|---|
+| SafeBuyBond deploy (arbiter=payer) | `0x74e12cca…0b76fa31` → `0xb24b3c368d8d3e18833ba91fccfce124980ad409` |
+| Scam buy settle | [`0x8b0d270a…36b781f55`](https://atlantic.pharosscan.xyz/tx/0x8b0d270ae931600b64b8e2cb7f2f6b8a39bd1db21eb36860488e18c36b781f55) |
+| **On-chain refund (bond slash)** | [`0x9b17f05c…e4c99f3d2`](https://atlantic.pharosscan.xyz/tx/0x9b17f05c21b74c6bb039b25e2176fb9555cff5e85dc7fe567383303e4c99f3d2) |
+
+Net: buyer paid 0.01, reclaimed 0.01 (zero loss); provider bond 1.00 → 0.99 sUSD.
+Full loop — discover, reputation-gate, x402 settle, schema verify, bond-slash
+refund — is real Pharos Atlantic on-chain. `BOND_CONTRACT=0xb24b3c368d8d3e18833ba91fccfce124980ad409`.
