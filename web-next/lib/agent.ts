@@ -5,6 +5,7 @@
 
 import { retrieve } from "@/lib/rag";
 import { buildRequest, EXPLORER, looksLikeBuy, SCHEMAS, safeBuy, wantsCheap, type JsonSchema, type SafeBuyRequest } from "@/lib/safeBuy";
+import { REAL_RAIL, realBuy } from "@/lib/realRail";
 
 const TR_BASE = process.env.TOKENROUTER_BASE_URL ?? "https://api.aicredits.in/v1";
 const TR_MODEL = process.env.TOKENROUTER_MODEL ?? "deepseek/deepseek-v4-flash";
@@ -58,7 +59,7 @@ export interface AgentReply {
   answer?: string;
   sources?: string[];
   explorer?: string;
-  buy?: ReturnType<typeof safeBuy>;
+  buy?: ReturnType<typeof safeBuy> | Awaited<ReturnType<typeof realBuy>>;
   error?: string;
 }
 
@@ -113,6 +114,15 @@ export async function runAgent(message: string): Promise<AgentReply> {
   }
 
   if (decision.action === "buy" && decision.intent) {
+    // Real on-chain rail when configured (VPS) — same verified MCP path.
+    if (REAL_RAIL) {
+      try {
+        const r = await realBuy(message);
+        return { type: "buy", explorer: r.explorer, buy: r, sources };
+      } catch {
+        /* fall through to simulated */
+      }
+    }
     const it = decision.intent;
     const schema: JsonSchema = SCHEMAS[it.schema ?? "gold"] ?? SCHEMAS.gold!;
     const req: SafeBuyRequest = {

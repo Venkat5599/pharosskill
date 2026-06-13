@@ -34,6 +34,7 @@ interface BuyResult {
   refunded?: boolean;
   refundTxHash?: string;
   simulated?: boolean;
+  real?: boolean;
   reason?: string;
 }
 interface Msg {
@@ -368,7 +369,10 @@ function BotResponse({ data, onDone }: { data: BuyResult | "error"; onDone: () =
                 );
               })}
             </div>
-            {verdict && data.simulated && (
+            {verdict && data.real && (
+              <p className="mt-2 inline-flex items-center gap-[6px] rounded-full border border-[rgba(200,230,75,.5)] bg-[rgba(200,230,75,.18)] px-[10px] py-[4px] text-[11px] font-bold uppercase tracking-[.08em] text-[#4f5d12]">⛓ real on-chain · Pharos Atlantic</p>
+            )}
+            {verdict && data.simulated && !data.real && (
               <p className="mt-2 text-[12px] italic text-muted">Simulated offline rail — no on-chain tx. Real x402 settlement + bond-slash refund run live via the CLI (see Live proof for real txs).</p>
             )}
             {verdict && <Verdict data={data} />}
