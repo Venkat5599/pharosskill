@@ -43,18 +43,37 @@ async function run(label: string, req: SafeBuyRequest): Promise<void> {
 console.log(`reputation source: ${REPUTATION_REGISTRY ? "ERC-8004 registry " + REPUTATION_REGISTRY : "seeded (offline)"}`);
 console.log(`refund source:     ${BOND_CONTRACT ? "SafeBuyBond " + BOND_CONTRACT : "n/a"}`);
 
-await run("HONEST BUY (reputation-gated)", {
-  query: "current gold price",
-  schema: goldSchema,
-  maxPriceUSDC: 0.1,
-  minReputation: 0.5,
-});
+// Env-driven single buy (used by the Pharos Skill Engine command templates).
+// Set SAFEBUY_QUERY / SAFEBUY_ALLOW_UNTRUSTED / SAFEBUY_SELECT_BY / SAFEBUY_MAX_PRICE
+// to run one configurable purchase; otherwise run the two-flow demo below.
+const envDriven =
+  process.env.SAFEBUY_QUERY ||
+  process.env.SAFEBUY_ALLOW_UNTRUSTED ||
+  process.env.SAFEBUY_SELECT_BY;
 
-await run("FORCED SCAM BUY (pay -> bad delivery -> on-chain refund)", {
-  query: "gold price, cheapest, ignore the rating",
-  schema: goldSchema,
-  maxPriceUSDC: 0.1,
-  minReputation: 0.5,
-  selectBy: "price",
-  allowUntrusted: true,
-});
+if (envDriven) {
+  await run("safeBuy", {
+    query: process.env.SAFEBUY_QUERY ?? "current gold price",
+    schema: goldSchema,
+    maxPriceUSDC: Number(process.env.SAFEBUY_MAX_PRICE ?? 0.1),
+    minReputation: Number(process.env.SAFEBUY_MIN_REPUTATION ?? 0.5),
+    selectBy: process.env.SAFEBUY_SELECT_BY === "price" ? "price" : "trust",
+    allowUntrusted: process.env.SAFEBUY_ALLOW_UNTRUSTED === "1" || process.env.SAFEBUY_ALLOW_UNTRUSTED === "true",
+  });
+} else {
+  await run("HONEST BUY (reputation-gated)", {
+    query: "current gold price",
+    schema: goldSchema,
+    maxPriceUSDC: 0.1,
+    minReputation: 0.5,
+  });
+
+  await run("FORCED SCAM BUY (pay -> bad delivery -> on-chain refund)", {
+    query: "gold price, cheapest, ignore the rating",
+    schema: goldSchema,
+    maxPriceUSDC: 0.1,
+    minReputation: 0.5,
+    selectBy: "price",
+    allowUntrusted: true,
+  });
+}

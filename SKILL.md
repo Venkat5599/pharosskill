@@ -198,6 +198,7 @@ safeBuy is consumable three ways, all over the same framework-free core:
 | Surface | Path | Use |
 |---|---|---|
 | **Skill** | `skills/safebuy/SKILL.md` | Drop-in agent skill (frontmatter + rules) for agent frameworks / Claude Code. |
+| **Pharos Skill Engine** | `pharos-skill/` | Native Pharos Agent Center format — `SKILL.md` Capability Index + `references/safebuy.md` (command templates) + `assets/safebuy/*.sol`. |
 | **SDK** | `sdk/` — `@cashier/safebuy-sdk` | `createSafeBuy({...})` for the real Pharos rail, or inject your own `SafeBuyDeps` (any chain/agent/model). |
 | **MCP** | `mcp/` — Streamable HTTP `:4030/mcp` (`bun run mcp`) | Tools `safebuy_purchase` · `safebuy_quote` · `list_providers` for any MCP client (Claude, Cursor). |
 | **Web** | `web-next/` (Next.js) + `src/web` | Landing + dashboard + RAG agent. Browser wallet pays real x402; no server-side buyer key. |
