@@ -17,6 +17,11 @@ const PORT = Number(process.env.PROVIDER_PORT ?? 4021);
 const FACILITATOR_URL = process.env.FACILITATOR_URL ?? "http://localhost:4022";
 const PAY_TO = (process.env.PROVIDER_ADDRESS ??
   "0x1111111111111111111111111111111111111111") as `0x${string}`;
+// Per-endpoint payTo so the honest and scam providers are DISTINCT on-chain
+// agents — that lets the reputation registry score them differently and makes
+// the reputation-gate a real on-chain read. Fall back to PAY_TO if unset.
+const PAY_TO_GOLD = (process.env.PROVIDER_ADDRESS_GOLD ?? PAY_TO) as `0x${string}`;
+const PAY_TO_CHEAP = (process.env.PROVIDER_ADDRESS_CHEAP ?? PAY_TO) as `0x${string}`;
 
 const facilitatorClient = new HTTPFacilitatorClient({ url: FACILITATOR_URL });
 const resourceServer = new x402ResourceServer(facilitatorClient).register(
@@ -35,7 +40,7 @@ app.use(
         accepts: {
           scheme: "exact",
           network: PHAROS_NETWORK,
-          payTo: PAY_TO,
+          payTo: PAY_TO_GOLD,
           maxTimeoutSeconds: 60,
           price: { amount: usdcAmount(0.05), asset: TEST_USDC, extra: { name: TOKEN_NAME, version: TOKEN_VERSION } },
         },
@@ -45,7 +50,7 @@ app.use(
         accepts: {
           scheme: "exact",
           network: PHAROS_NETWORK,
-          payTo: PAY_TO,
+          payTo: PAY_TO_CHEAP,
           maxTimeoutSeconds: 60,
           price: { amount: usdcAmount(0.01), asset: TEST_USDC, extra: { name: TOKEN_NAME, version: TOKEN_VERSION } },
         },

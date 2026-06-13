@@ -100,3 +100,20 @@ REAL on-chain clawback — buyer made whole, no mocks anywhere in the loop.
 Net: buyer paid 0.01, reclaimed 0.01 (zero loss); provider bond 1.00 → 0.99 sUSD.
 Full loop — discover, reputation-gate, x402 settle, schema verify, bond-slash
 refund — is real Pharos Atlantic on-chain. `BOND_CONTRACT=0xb24b3c368d8d3e18833ba91fccfce124980ad409`.
+
+### Live reputation gate — real on-chain read (2026-06-13)
+
+ReputationRegistry deployed + seeded; two DISTINCT provider addresses so the gate
+is a genuine on-chain `scoreOf` read, not a constant.
+
+| What | Value / Tx |
+|---|---|
+| ReputationRegistry | `0x9599f47ba6b1b74b149f5c2598e77a27862cf670` |
+| scoreOf(honest 0x32dE…) | 9200 bps = 0.92 |
+| scoreOf(scam 0xb456…) | 1800 bps = 0.18 |
+| Honest buy (passed gate, no override) | [`0x90836539…be02411b2`](https://atlantic.pharosscan.xyz/tx/0x9083653904b5432df7a723322d70bb3060e677c699744bc50651751be02411b2) |
+
+Three demoable paths, all real on-chain:
+1. **Honest** — live rep 0.92 ≥ floor → real x402 settle → schema verify → deliver.
+2. **Rep-gate refusal** — live rep 0.18 < 0.5 → refuses, NO payment made.
+3. **Scam + override** — real settle → schema fail → real bond-slash refund.
