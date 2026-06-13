@@ -79,12 +79,15 @@ async function rerank(message: string, hits: Hit[], keep = 4): Promise<Hit[]> {
 
 // ---------- 5. ANSWER (+span citations, +insufficiency flag for multi-hop) ----------
 interface Answer { answer: string; spans: string[]; sufficient: boolean }
-const ANS_SYS = `You answer questions about the safeBuy skill strictly from CONTEXT.
+const ANS_SYS = `You are Cashier, the assistant for the safeBuy skill. Answer questions about safeBuy using CONTEXT.
 Return ONLY JSON:
-{"answer":"concise accurate answer grounded in CONTEXT (2-5 sentences)",
- "spans":["exact quoted sentence(s) from CONTEXT that support the answer"],
- "sufficient": true|false  // false if CONTEXT lacks the info to answer well}
-Never invent addresses, tx hashes, or numbers absent from CONTEXT.`;
+{"answer":"concise reply (2-5 sentences)",
+ "spans":["exact quoted sentence(s) from CONTEXT that support the answer — empty array for greetings/smalltalk"],
+ "sufficient": true|false}
+Rules:
+- If the user is greeting or making smalltalk (e.g. "hi", "hello", "what can you do"), reply warmly in ONE friendly line, briefly say you can explain safeBuy or buy data/services on Pharos, set spans=[] and sufficient=true. Do NOT say the context lacks info.
+- For real questions, ground the answer in CONTEXT and quote supporting spans.
+- Never invent addresses, tx hashes, or numbers absent from CONTEXT.`;
 
 async function answer(message: string, hits: Hit[]): Promise<Answer> {
   const ctx = hits.map((h, i) => `[${i + 1}] (${h.chunk.source} › ${h.chunk.heading})\n${h.chunk.text}`).join("\n\n");
@@ -104,8 +107,23 @@ export interface RagReply {
   error?: string;
 }
 
+function isGreeting(m: string): boolean {
+  return /^\s*(hi|hello|hey|yo|sup|gm|gn|good (morning|afternoon|evening)|what'?s up|wassup|how are you|who are you|what can you do|help)\b[\s!.?]*$/i.test(m.trim());
+}
+
 export async function runRagAgent(message: string): Promise<RagReply> {
   if (!process.env.TOKENROUTER_API_KEY) return { type: "error", error: "LLM key not set" };
+
+  // Greeting / smalltalk → instant friendly reply, no retrieval, no source chips.
+  if (isGreeting(message)) {
+    return {
+      type: "answer",
+      answer:
+        "Hi — I'm Cashier, the agent behind safeBuy: the trust layer for agent commerce on Pharos. Ask me how the trust loop works (reputation-gating, x402 payment, on-chain refunds), or tell me to buy data — e.g. \"buy the gold price\" or \"buy the cheapest, ignore the rating\".",
+      spans: [],
+      sources: [],
+    };
+  }
 
   let p: Plan;
   try { p = await plan(message); }
@@ -142,12 +160,14 @@ export async function runRagAgent(message: string): Promise<RagReply> {
     } catch { /* keep first answer */ }
   }
 
+  // Greeting/smalltalk (no supporting spans) → don't show source chips or hops.
+  const isSmalltalk = a.spans.length === 0;
   return {
     type: "answer",
     answer: a.answer,
     spans: a.spans,
-    sources: [...new Set(top.map((h) => `${h.chunk.source}${h.chunk.heading ? " › " + h.chunk.heading : ""}`))].slice(0, 5),
-    hops,
+    sources: isSmalltalk ? [] : [...new Set(top.map((h) => `${h.chunk.source}${h.chunk.heading ? " › " + h.chunk.heading : ""}`))].slice(0, 5),
+    hops: isSmalltalk ? undefined : hops,
   };
 }
 

@@ -70,3 +70,66 @@ bun run src/pharos/liveBuy.ts
 `slash` is authorized by an `arbiter` (the safeBuy agent) acting on the off-chain
 schema-verification result. Production would replace this with an optimistic
 dispute window + on-chain verification proof, removing the trusted arbiter.
+
+## Live MCP buys — real on-chain (2026-06-13)
+
+The MCP server (`http://187.127.137.136:4030/mcp`) settles real x402 EIP-3009
+payments on Pharos Atlantic. Verified tx (all status `success`):
+
+| What | Tx |
+|---|---|
+| Mint 100 sUSD → payer | [`0x3d89154c…abcbca7`](https://atlantic.pharosscan.xyz/tx/0x3d89154c2de8882984d3ce5a69eb9f66963630020eef73fb86408ce41abcbca7) |
+| Honest buy (TrustFeed, delivered XAU) | [`0xf0b7fd24…ee91a36`](https://atlantic.pharosscan.xyz/tx/0xf0b7fd24b73d17ce4c649a7b409ea59e1203736b4a66da80a74b1b1ceee91a36) |
+| Scam buy settle (CheapData) | [`0xa26a1c9d…393f2e2`](https://atlantic.pharosscan.xyz/tx/0xa26a1c9dcdccad3b49c3857ef8955907628027be1bd3b2e9bf3cefa51393f2e2) |
+
+Balances after: payer 99.94 sUSD, provider 0.06 sUSD. The scam buy settled but
+did NOT auto-refund (no `BOND_CONTRACT` deployed for these addresses) — refund
+needs the SafeBuyBond infra wired (see `deployInfra.ts`).
+
+### Real bond-slash refund (complete loop, 2026-06-13)
+
+SafeBuyBond deployed live + wired into the MCP. A scam delivery now triggers a
+REAL on-chain clawback — buyer made whole, no mocks anywhere in the loop.
+
+| What | Tx |
+|---|---|
+| SafeBuyBond deploy (arbiter=payer) | `0x74e12cca…0b76fa31` → `0xb24b3c368d8d3e18833ba91fccfce124980ad409` |
+| Scam buy settle | [`0x8b0d270a…36b781f55`](https://atlantic.pharosscan.xyz/tx/0x8b0d270ae931600b64b8e2cb7f2f6b8a39bd1db21eb36860488e18c36b781f55) |
+| **On-chain refund (bond slash)** | [`0x9b17f05c…e4c99f3d2`](https://atlantic.pharosscan.xyz/tx/0x9b17f05c21b74c6bb039b25e2176fb9555cff5e85dc7fe567383303e4c99f3d2) |
+
+Net: buyer paid 0.01, reclaimed 0.01 (zero loss); provider bond 1.00 → 0.99 sUSD.
+Full loop — discover, reputation-gate, x402 settle, schema verify, bond-slash
+refund — is real Pharos Atlantic on-chain. `BOND_CONTRACT=0xb24b3c368d8d3e18833ba91fccfce124980ad409`.
+
+### Live reputation gate — real on-chain read (2026-06-13)
+
+ReputationRegistry deployed + seeded; two DISTINCT provider addresses so the gate
+is a genuine on-chain `scoreOf` read, not a constant.
+
+| What | Value / Tx |
+|---|---|
+| ReputationRegistry | `0x9599f47ba6b1b74b149f5c2598e77a27862cf670` |
+| scoreOf(honest 0x32dE…) | 9200 bps = 0.92 |
+| scoreOf(scam 0xb456…) | 1800 bps = 0.18 |
+| Honest buy (passed gate, no override) | [`0x90836539…be02411b2`](https://atlantic.pharosscan.xyz/tx/0x9083653904b5432df7a723322d70bb3060e677c699744bc50651751be02411b2) |
+
+Three demoable paths, all real on-chain:
+1. **Honest** — live rep 0.92 ≥ floor → real x402 settle → schema verify → deliver.
+2. **Rep-gate refusal** — live rep 0.18 < 0.5 → refuses, NO payment made.
+3. **Scam + override** — real settle → schema fail → real bond-slash refund.
+
+### Trustless slash — arbiter removed (V2, 2026-06-13)
+
+`SafeBuyBondV2` (`contracts/SafeBuyBondV2.sol`) verifies the refund on-chain
+instead of trusting an arbiter. The provider EIP-191-signs its delivery;
+`slashWithProof` recovers the signer (must be the provider) AND checks the signed
+response is missing the required field — only then slashes. Permissionless.
+
+| What | Tx / Addr |
+|---|---|
+| SafeBuyBondV2 | `0xfcbf7bd428d46daf889eac384d7cdd8181aae4b7` |
+| Scam-signed delivery → trustless slash (real refund) | [`0xd200dc0d…077939e32`](https://atlantic.pharosscan.xyz/tx/0xd200dc0db5ce16d60a4ed327e8eae86960e882256471f4f65170363077939e32) |
+| Honest-signed delivery → slash **reverts** | `"delivery satisfies schema"` (contract protects honest provider) |
+
+Proven on-chain: a scammer's own signature convicts it; an honest provider is
+mathematically un-slashable. The trusted third party is gone.
