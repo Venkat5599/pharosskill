@@ -9,9 +9,19 @@ Next Route Handler.
 - `/dashboard` — chat dashboard (`app/dashboard/page.tsx`)
 - `/agent` — RAG agent (`app/agent/page.tsx`): grounded on the project docs, and
   calls the safeBuy skill as a tool when you ask to buy
-- `POST /api/buy` — safeBuy trust loop (`app/api/buy/route.ts` → `lib/safeBuy.ts`)
-- `POST /api/agent` — RAG + tool-calling agent (`app/api/agent/route.ts` →
-  `lib/agent.ts` + `lib/rag.ts`)
+- `POST /api/buy` — safeBuy trust loop, simulated rail (`lib/safeBuy.ts`)
+- `POST /api/agent` — RAG + tool-calling agent (`lib/agent.ts` + `lib/rag.ts`)
+- `POST /api/plan` + `POST /api/settle` — **real wallet rail**: plan selects a
+  provider; the browser signs an EIP-3009 authorization (gasless, `lib/wallet.ts`);
+  the facilitator broadcasts it on-chain in `/api/settle`. Real Pharos tx hashes.
+
+## Two payment rails
+- **Simulated** (default, no wallet): runs the full trust loop offline. Steps are
+  labelled "simulated" and emit no tx hashes (so nothing 404s on the explorer).
+- **Real** (click "Connect wallet" on the dashboard): buyer signs an EIP-3009
+  `TransferWithAuthorization` for SafeUSD; `/api/settle`'s facilitator broadcasts
+  it. Needs `FACILITATOR_PRIVATE_KEY` (gas) server-side and SafeUSD in the buyer's
+  wallet. See `DEPLOY.md`.
 
 ## The RAG agent
 `lib/rag.ts` chunks + embeds `content/*.md` (the skill docs) via

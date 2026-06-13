@@ -71,6 +71,12 @@ function discover(query: string): Seeded[] {
   if (q.includes("gold") || q.includes("xau")) return [TRUST, CHEAP];
   return [TRUST, CHEAP];
 }
+
+const BY_ID: Record<string, Seeded> = { [TRUST.id]: TRUST, [CHEAP.id]: CHEAP, [FX.id]: FX };
+export function providerById(id: string): Provider | undefined {
+  const p = BY_ID[id];
+  return p && { id: p.id, name: p.name, endpoint: p.endpoint, priceUSDC: p.priceUSDC, agentAddress: p.agentAddress };
+}
 // ---------- verifier ----------
 function checkSchema(value: unknown, schema: JsonSchema, path: string): string | null {
   const typeOf = (v: unknown): string =>
@@ -102,32 +108,29 @@ function verify(response: unknown, schema: JsonSchema): { ok: boolean; reason?: 
   return err ? { ok: false, reason: err } : { ok: true };
 }
 
-// ---------- safeBuy loop ----------
-export function safeBuy(req: SafeBuyRequest) {
+// ---------- selection (discover + reputation-gate + select) ----------
+// Shared by the simulated rail (safeBuy) AND the real wallet rail (/api/plan):
+// runs everything up to — but not including — payment, so the buyer can sign
+// the x402 authorization for the chosen provider in their own wallet.
+export type SelectResult =
+  | { ok: true; pick: Seeded; steps: Step[] }
+  | { ok: false; reason: string; steps: Step[] };
+
+export function selectProvider(req: SafeBuyRequest): SelectResult {
   const steps: Step[] = [];
   const minRep = req.minReputation ?? 0.5;
-  const log = (s: Step) => {
-    steps.push(s);
-  };
-  const fail = (reason: string) => {
+  const log = (s: Step) => steps.push(s);
+  const fail = (reason: string): SelectResult => {
     log({ kind: "abort", detail: reason, ok: false });
     return { ok: false, reason, steps };
   };
 
   const providers = discover(req.query);
   if (providers.length === 0) return fail(`no provider found for "${req.query}"`);
-  log({
-    kind: "discover",
-    detail: `found ${providers.length} provider(s): ${providers.map((p) => p.name).join(", ")}`,
-    ok: true,
-  });
+  log({ kind: "discover", detail: `found ${providers.length} provider(s): ${providers.map((p) => p.name).join(", ")}`, ok: true });
 
   for (const p of providers)
-    log({
-      kind: "reputation",
-      detail: `${p.name}: reputation ${p.reputation.toFixed(2)}, price ${p.priceUSDC} USDC`,
-      ok: p.reputation >= minRep,
-    });
+    log({ kind: "reputation", detail: `${p.name}: reputation ${p.reputation.toFixed(2)}, price ${p.priceUSDC} USDC`, ok: p.reputation >= minRep });
 
   const affordable = providers.filter((p) => p.priceUSDC <= req.maxPriceUSDC);
   if (affordable.length === 0) return fail(`all providers exceed maxPrice ${req.maxPriceUSDC} USDC`);
@@ -138,9 +141,7 @@ export function safeBuy(req: SafeBuyRequest) {
     eligible = affordable.filter((p) => p.reputation >= minRep);
     if (eligible.length === 0) {
       const best = [...affordable].sort((a, b) => b.reputation - a.reputation)[0]!;
-      return fail(
-        `no provider clears reputation >= ${minRep} (best was ${best.name} @ ${best.reputation.toFixed(2)}). Refusing to buy. Pass allowUntrusted to override.`,
-      );
+      return fail(`no provider clears reputation >= ${minRep} (best was ${best.name} @ ${best.reputation.toFixed(2)}). Refusing to buy. Pass allowUntrusted to override.`);
     }
   }
   const pick = eligible.sort((a, b) =>
@@ -148,35 +149,41 @@ export function safeBuy(req: SafeBuyRequest) {
       ? a.priceUSDC - b.priceUSDC || b.reputation - a.reputation
       : b.reputation - a.reputation || a.priceUSDC - b.priceUSDC,
   )[0]!;
-  log({
-    kind: "select",
-    detail: `chose ${pick.name} (reputation ${pick.reputation.toFixed(2)}, ${pick.priceUSDC} USDC)`,
-    ok: true,
-  });
+  log({ kind: "select", detail: `chose ${pick.name} (reputation ${pick.reputation.toFixed(2)}, ${pick.priceUSDC} USDC)`, ok: true });
+  return { ok: true, pick, steps };
+}
 
-  // pay (offline rail). NOTE: this is the simulated rail — it does NOT touch a
-  // chain, so it emits NO tx hash (a fake hash would 404 on the explorer). Real
-  // settlement runs through the live x402 rail (see liveBuy.ts / DEPLOY-LIVE.md).
+// ---------- delivery + schema verification (post-payment) ----------
+export function deliverVerify(pickId: string, schema: JsonSchema): { ok: boolean; data?: unknown; reason?: string } {
+  const pick = BY_ID[pickId];
+  if (!pick) return { ok: false, reason: "unknown provider" };
   const response = pick.handler();
+  const v = verify(response, schema);
+  return v.ok ? { ok: true, data: response } : { ok: false, reason: v.reason };
+}
+
+// ---------- safeBuy loop (simulated rail) ----------
+export function safeBuy(req: SafeBuyRequest) {
+  const sel = selectProvider(req);
+  if (!sel.ok) return { ok: false, reason: sel.reason, steps: sel.steps };
+  const { pick } = sel;
+  const steps = sel.steps;
+  const log = (s: Step) => steps.push(s);
+
+  // pay (offline rail). NOTE: simulated — does NOT touch a chain, so it emits NO
+  // tx hash (a fake hash would 404). Real settlement runs through the wallet rail
+  // (/api/plan + client x402 signing + /api/settle).
   log({ kind: "pay", detail: `paid ${pick.priceUSDC} USDC to ${pick.name} via x402 (simulated — offline rail)`, ok: true });
 
-  const v = verify(response, req.schema);
+  const v = deliverVerify(pick.id, req.schema);
   if (!v.ok) {
     log({ kind: "verify", detail: `delivery FAILED: ${v.reason}`, ok: false });
     log({ kind: "refund", detail: `reclaimed ${pick.priceUSDC} USDC (simulated — offline rail)`, ok: true });
-    return {
-      ok: false,
-      provider: pick,
-      paidUSDC: pick.priceUSDC,
-      refunded: true,
-      simulated: true,
-      steps,
-      reason: `bad delivery, refunded: ${v.reason}`,
-    };
+    return { ok: false, provider: pick, paidUSDC: pick.priceUSDC, refunded: true, simulated: true, steps, reason: `bad delivery, refunded: ${v.reason}` };
   }
   log({ kind: "verify", detail: "delivery matches schema", ok: true });
   log({ kind: "deliver", detail: "purchase complete", ok: true });
-  return { ok: true, data: response, provider: pick, paidUSDC: pick.priceUSDC, simulated: true, steps };
+  return { ok: true, data: v.data, provider: pick, paidUSDC: pick.priceUSDC, simulated: true, steps };
 }
 
 // ---------- request shaping ----------

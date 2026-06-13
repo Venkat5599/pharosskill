@@ -29,15 +29,36 @@ cd /root/cashier-web
 ## 2. Create the secret env (on the server — NOT committed)
 ```bash
 cat > prod.env <<'EOF'
+# LLM brain + RAG embeddings (aicredits)
 TOKENROUTER_API_KEY=PUT_YOUR_AICREDITS_KEY_HERE
 TOKENROUTER_BASE_URL=https://api.aicredits.in/v1
 TOKENROUTER_MODEL=deepseek/deepseek-v4-flash
 EMBED_MODEL=text-embedding-3-small
 PHAROS_EXPLORER=https://atlantic.pharosscan.xyz/tx/
+
+# --- REAL on-chain settlement (optional) ---
+# The buyer connects their wallet in the browser and signs an EIP-3009
+# authorization (gasless). The FACILITATOR below broadcasts it and pays gas.
+# Needs PHRS gas in the facilitator wallet. Leave unset = simulated rail only.
+FACILITATOR_PRIVATE_KEY=
+PHAROS_RPC=https://atlantic.dplabs-internal.com/
+TEST_USDC=0xf61cbfe72aa03a12a64122b0ada0b19ce57ad80d
+# Optional: bond contract for real slash-refund on a scam delivery.
+BOND_CONTRACT=
 EOF
 chmod 600 prod.env
 ```
-> Use a freshly-rotated key. The key pasted in chat earlier should be revoked.
+> Use a freshly-rotated aicredits key. The key pasted in chat earlier should be revoked.
+
+### Real wallet payments (how it works)
+- No buyer key ever touches the server. The browser signs the EIP-3009
+  `TransferWithAuthorization` for SafeUSD; `/api/settle` has the **facilitator**
+  broadcast it. Buyer pays no gas; facilitator does.
+- To pay, the buyer needs **SafeUSD (`sUSD`) in their wallet** on Pharos Atlantic
+  (chain 688689). SafeUSD has an open `mint()` — fund a test wallet via the
+  contract. Without a connected wallet the demo uses the labelled simulated rail.
+- Set `BOND_CONTRACT` to make a scam delivery trigger a **real on-chain slash
+  refund** (facilitator acts as arbiter). Addresses are in `LIVE_DEPLOYMENT.md`.
 
 ## 3. Deploy
 ```bash

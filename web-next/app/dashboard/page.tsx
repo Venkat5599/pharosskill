@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { connect as walletConnect, hasWallet, signAuthorization } from "@/lib/wallet";
 
 const LINE = "border-[color:var(--line)]";
 
@@ -67,12 +68,35 @@ export default function Dashboard() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [account, setAccount] = useState<string | null>(null);
   const feedRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     feedRef.current?.scrollTo({ top: feedRef.current.scrollHeight });
   }, [msgs]);
+
+  async function onConnect() {
+    try {
+      setAccount(await walletConnect());
+    } catch (e) {
+      alert((e as Error).message);
+    }
+  }
+
+  // Real wallet rail: plan (server selects) -> buyer signs EIP-3009 (gasless) ->
+  // settle (facilitator broadcasts) -> real on-chain tx. Falls back to the
+  // simulated rail (/api/buy) when no wallet is connected.
+  async function realBuy(message: string): Promise<BuyResult> {
+    const plan = (await (await fetch("/api/plan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message }) })).json()) as
+      | { ok: true; steps: Step[]; pick: { agentAddress: string; valueAtomic: string } }
+      | { ok: false; reason?: string; steps?: Step[] };
+    if (!plan.ok) return { explorer: "", ok: false, steps: plan.steps ?? [{ kind: "abort", detail: plan.reason ?? "refused", ok: false }], reason: plan.reason };
+    const auth = await signAuthorization(account!, plan.pick.agentAddress, plan.pick.valueAtomic);
+    const res = (await (await fetch("/api/settle", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message, auth }) })).json()) as BuyResult & { error?: string };
+    if (!res.steps) return { explorer: "", ok: false, steps: [...plan.steps, { kind: "abort", detail: res.error ?? "settlement failed", ok: false }], reason: res.error };
+    return res;
+  }
 
   async function ask(message: string) {
     if (busy) return;
@@ -81,14 +105,14 @@ export default function Dashboard() {
     setMsgs((m) => [...m, { id: ++uid, role: "user", text: message }]);
     let data: BuyResult | "error";
     try {
-      const r = await fetch("/api/buy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-      });
-      data = (await r.json()) as BuyResult;
-    } catch {
-      data = "error";
+      if (account) {
+        data = await realBuy(message);
+      } else {
+        const r = await fetch("/api/buy", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message }) });
+        data = (await r.json()) as BuyResult;
+      }
+    } catch (e) {
+      data = { explorer: "", ok: false, steps: [{ kind: "abort", detail: `wallet: ${(e as Error).message}`, ok: false }], reason: (e as Error).message } as BuyResult;
     }
     setMsgs((m) => [...m, { id: ++uid, role: "bot", data }]);
   }
@@ -160,9 +184,15 @@ export default function Dashboard() {
             <div className="font-display text-[19px] tracking-[-.02em]">Cashier</div>
             <div className="mt-px text-[12.5px] text-muted">reputation-gated · x402-paid · delivery-verified · auto-refund</div>
           </div>
-          <span className={`ml-auto inline-flex items-center gap-[7px] rounded-full border ${LINE} bg-cream px-[13px] py-[7px] text-[12px] font-semibold text-ink`}>
-            <span className="h-[7px] w-[7px] rounded-full bg-lime" />Pharos Atlantic
-          </span>
+          {account ? (
+            <span className={`ml-auto inline-flex items-center gap-[7px] rounded-full border ${LINE} bg-cream px-[13px] py-[7px] font-mono text-[12px] font-semibold text-ink`}>
+              <span className="h-[7px] w-[7px] rounded-full bg-lime" />{account.slice(0, 6)}…{account.slice(-4)} · live
+            </span>
+          ) : (
+            <button onClick={onConnect} className="ml-auto rounded-full bg-ink px-[15px] py-[8px] text-[12.5px] font-semibold text-paper transition hover:bg-accent" title={hasWallet() ? "Pay real x402 from your wallet" : "Install a wallet to pay on-chain"}>
+              {hasWallet() ? "Connect wallet" : "No wallet"}
+            </button>
+          )}
         </div>
 
         {view === "chat" && <ChatView msgs={msgs} feedRef={feedRef} inputRef={inputRef} input={input} setInput={setInput} submit={submit} busy={busy} ask={ask} onDone={() => { setBusy(false); inputRef.current?.focus(); }} />}
