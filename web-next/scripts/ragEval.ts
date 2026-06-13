@@ -4,7 +4,8 @@
 //
 // Run: AGENT_URL=http://187.127.137.136:8090/api/agent bun run scripts/ragEval.ts
 
-const URL = process.env.AGENT_URL ?? "http://localhost:3000/api/agent";
+const AGENT_URL = process.env.AGENT_URL ?? "http://localhost:3000/api/agent";
+export {};
 
 interface Case { q: string; expectSource: string; expectAny: string[] }
 const CASES: Case[] = [
@@ -21,7 +22,7 @@ function norm(s: string) { return s.toLowerCase(); }
 let grounded = 0, factual = 0, ok = 0;
 for (const c of CASES) {
   try {
-    const r = await fetch(URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: c.q }), signal: AbortSignal.timeout(120000) });
+    const r = await fetch(AGENT_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: c.q }), signal: AbortSignal.timeout(120000) });
     const d = (await r.json()) as { type?: string; answer?: string; sources?: string[] };
     const ans = norm(d.answer ?? "");
     const srcOk = !c.expectSource || (d.sources ?? []).some((s) => s.includes(c.expectSource));

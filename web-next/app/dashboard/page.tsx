@@ -173,7 +173,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-[9px] text-[13px] font-semibold">
             <span className="h-2 w-2 rounded-full bg-lime shadow-[0_0_0_4px_rgba(200,230,75,.25)]" />Live on Pharos Atlantic
           </div>
-          <div className="mt-[6px] text-[11.5px] leading-[1.45] text-muted">Offline demo rail — no wallet needed. Real x402 + refund run on-chain via the CLI.</div>
+          <div className="mt-[6px] text-[11.5px] leading-[1.45] text-muted">Real x402 settlement + bond-slash refund — live on Pharos Atlantic (chain 688689).</div>
         </div>
         <Link href="/" className="inline-flex items-center gap-[7px] p-1 text-[13.5px] font-semibold text-muted transition-colors hover:text-accent">← Back to site</Link>
       </aside>
