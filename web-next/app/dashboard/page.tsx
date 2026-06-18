@@ -464,7 +464,46 @@ function SkillView() {
           <span key={c} className={`rounded-full border ${LINE} bg-cream px-[15px] py-[9px] font-mono text-[13px] font-semibold`}>{c}</span>
         ))}
       </div>
+
+      <h3 className="mt-[44px] font-display text-[clamp(22px,2.6vw,30px)] leading-[1.05]">Get the skill <em className="font-serif-i text-accent">running</em>.</h3>
+      <p className="mb-[18px] mt-[10px] max-w-[60ch] text-[15.5px] leading-[1.5] text-ink-soft">Clone, install, run the trust loop — or connect the live MCP straight into your own agent. Copy and go.</p>
+      <div className="flex flex-col gap-[14px]">
+        <CopyBlock label="1 · Clone + install" code="git clone https://github.com/Venkat5599/pharosskill && cd pharosskill && bun install" />
+        <CopyBlock label="2 · Run the safeBuy trust loop" code="bun run src/pharos/liveBuy.ts" />
+        <CopyBlock label="3 · Run the MCP server (→ :4030/mcp)" code="bun run mcp" />
+        <CopyBlock label="4 · Add the live MCP to Claude Code" code="claude mcp add --transport http safebuy http://187.127.137.136:4030/mcp" />
+        <CopyBlock label="5 · Or drop into any MCP client config" code={`{
+  "mcpServers": {
+    "safebuy": { "url": "http://187.127.137.136:4030/mcp" }
+  }
+}`} multiline />
+      </div>
+      <p className="mt-[14px] text-[13px] text-muted">The MCP at <span className="font-mono">187.127.137.136:4030</span> is live now — point an agent at it and it runs the real on-chain trust loop on Pharos Atlantic.</p>
     </DocShell>
+  );
+}
+
+function CopyBlock({ label, code, multiline }: { label: string; code: string; multiline?: boolean }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1400);
+    } catch {
+      /* clipboard blocked — ignore */
+    }
+  };
+  return (
+    <div className={`overflow-hidden rounded-[14px] border ${LINE} bg-ink`}>
+      <div className="flex items-center justify-between border-b border-[rgba(244,239,230,.12)] px-[15px] py-[9px]">
+        <span className="text-[12px] font-semibold uppercase tracking-[.08em] text-lime">{label}</span>
+        <button onClick={copy} className="rounded-full border border-[rgba(244,239,230,.2)] px-[12px] py-[5px] text-[12px] font-semibold text-paper transition-colors duration-150 hover:border-accent hover:text-accent">
+          {copied ? "Copied ✓" : "Copy"}
+        </button>
+      </div>
+      <pre className={`overflow-x-auto px-[15px] py-[13px] font-mono text-[13px] leading-[1.55] text-paper ${multiline ? "" : "whitespace-pre-wrap break-all"}`}>{code}</pre>
+    </div>
   );
 }
 
