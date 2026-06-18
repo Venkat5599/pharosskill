@@ -132,10 +132,6 @@ export default function Dashboard() {
                 {n.label}
               </button>
             ))}
-            <Link href="/agent" className="flex items-center gap-[11px] rounded-[11px] px-3 py-[10px] text-[14.5px] font-medium text-ink transition-colors duration-150 hover:bg-card">
-              <span className="w-[18px] font-mono text-[10px] font-semibold leading-none text-accent">::</span>
-              RAG agent
-            </Link>
           </div>
         </div>
 
