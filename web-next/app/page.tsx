@@ -1,9 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const LINE = "border-[color:var(--line)]";
+const INSTALL_CMD = "npx skills add Venkat5599/pharosskill";
+
+function InstallPill() {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(INSTALL_CMD);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard blocked — ignore */
+    }
+  };
+  return (
+    <button
+      onClick={copy}
+      title="Copy — install the safeBuy skill into your agent"
+      className="group inline-flex items-center gap-[10px] rounded-full bg-ink px-[20px] py-[13px] font-mono text-[14px] font-semibold text-paper transition-transform duration-200 hover:-translate-y-0.5"
+    >
+      <span className="text-lime">$</span>
+      {INSTALL_CMD}
+      <span className="text-[12px] font-sans uppercase tracking-[.06em] text-lime group-hover:text-accent">{copied ? "copied ✓" : "copy"}</span>
+    </button>
+  );
+}
 
 const CHAPTERS = [
   { n: "01", t: "Discover", ic: "find", p: <>Find every provider that can satisfy the request via an on-chain registry.</>, panel: "bg-cream", num: "text-accent", h: "text-ink", body: "text-ink-soft", ic2: "text-accent" },
@@ -165,13 +190,17 @@ export default function Landing() {
               Cashier runs <strong>safeBuy</strong> — the whole trust loop in a single call. It buys only from sellers that clear an on-chain reputation gate, verifies what actually arrives, and claws the funds back automatically the moment a provider lies. <strong>No middleman. No arbiter. No bad debt.</strong>
             </p>
           </div>
-          <div className="mt-[30px] flex flex-wrap gap-[14px]">
+          <div className="mt-[30px] flex flex-wrap items-center gap-[14px]">
             <Link href="/dashboard" data-magnet className="rounded-full bg-accent px-[26px] py-[15px] text-base font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5">
               Try the live demo →
             </Link>
             <a href="#how" data-magnet className={`rounded-full border-[1.5px] border-ink px-[26px] py-[15px] text-base font-semibold transition-colors duration-200 hover:bg-ink hover:text-paper`}>
               See how it works
             </a>
+            <InstallPill />
+            <Link href="/docs" className={`rounded-full border-[1.5px] border-ink px-[26px] py-[15px] text-base font-semibold transition-colors duration-200 hover:bg-ink hover:text-paper`}>
+              Docs
+            </Link>
           </div>
           <div className="mt-[26px] flex flex-wrap gap-[10px]">
             {["Live on Pharos Atlantic", "x402 · EIP-3009 settlement", "ERC-8004 reputation", "TokenRouter brain"].map((b) => (
