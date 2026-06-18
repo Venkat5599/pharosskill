@@ -139,6 +139,7 @@ export default function Landing() {
             <a href="#capabilities" className="group relative py-1">Skill<span className="absolute -bottom-px left-0 h-0.5 w-0 bg-ink transition-[width] duration-[250ms] group-hover:w-full" /></a>
             <a href="#proof" className="group relative py-1">Live proof<span className="absolute -bottom-px left-0 h-0.5 w-0 bg-ink transition-[width] duration-[250ms] group-hover:w-full" /></a>
             <Link href="/agent" className="group relative py-1">Agent<span className="absolute -bottom-px left-0 h-0.5 w-0 bg-ink transition-[width] duration-[250ms] group-hover:w-full" /></Link>
+            <Link href="/docs" className="group relative py-1">Docs<span className="absolute -bottom-px left-0 h-0.5 w-0 bg-ink transition-[width] duration-[250ms] group-hover:w-full" /></Link>
             <Link href="/dashboard" className="group relative py-1">Dashboard<span className="absolute -bottom-px left-0 h-0.5 w-0 bg-ink transition-[width] duration-[250ms] group-hover:w-full" /></Link>
           </div>
           <Link href="/agent" data-magnet className="rounded-full bg-ink px-5 py-[11px] text-sm font-semibold text-paper transition-[transform,background] duration-200 hover:-translate-y-0.5 hover:bg-accent">
