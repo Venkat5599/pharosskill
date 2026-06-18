@@ -111,6 +111,7 @@ export default function Dashboard() {
     <div className="grid h-screen grid-cols-[300px_1fr] max-[820px]:grid-cols-1">
       {/* SIDEBAR */}
       <aside className={`flex flex-col gap-6 overflow-y-auto border-r ${LINE} bg-cream px-5 py-[22px] max-[820px]:hidden`}>
+        <Link href="/" className={`inline-flex items-center gap-[7px] self-start rounded-full border ${LINE} bg-card px-[13px] py-[7px] text-[13px] font-semibold text-ink transition-colors duration-150 hover:border-accent hover:text-accent`}>← Back to site</Link>
         <div className="flex items-center gap-3">
           <div className="relative grid h-11 w-11 place-items-center rounded-[13px] bg-ink font-display text-[21px] text-white after:absolute after:right-[9px] after:top-[9px] after:h-2 after:w-2 after:rounded-full after:bg-accent after:content-['']">C</div>
           <div>
@@ -155,7 +156,6 @@ export default function Dashboard() {
           </div>
           <div className="mt-[6px] text-[11.5px] leading-[1.45] text-muted">Real x402 settlement + bond-slash refund — live on Pharos Atlantic (chain 688689).</div>
         </div>
-        <Link href="/" className="inline-flex items-center gap-[7px] p-1 text-[13.5px] font-semibold text-muted transition-colors hover:text-accent">← Back to site</Link>
       </aside>
 
       {/* MAIN */}
