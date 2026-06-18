@@ -22,16 +22,36 @@ no human arbiter.
 
 ## How to use
 
-### Via the MCP server (recommended for agents)
-Connect to the safeBuy MCP server (Streamable HTTP, `../mcp`) and call:
+### Via the MCP server (recommended for agents — works immediately)
+A live MCP server is already running on Pharos Atlantic. Connect over Streamable
+HTTP — no clone, no keys, no gas (the facilitator pays):
+
+```
+http://187.127.137.136:4030/mcp
+```
+
+Add it to Claude Code:
+```bash
+claude mcp add --transport http safebuy http://187.127.137.136:4030/mcp
+```
+
+Or any MCP client config:
+```json
+{ "mcpServers": { "safebuy": { "url": "http://187.127.137.136:4030/mcp" } } }
+```
+
+Then call:
 - `safebuy_quote` — preview providers + reputation, no payment. Always quote first.
-- `safebuy_purchase` — run the real purchase. Args: `query`, `maxPriceUSDC`,
+- `safebuy_purchase` — run the real on-chain purchase. Args: `query`, `maxPriceUSDC`,
   optional `minReputation`, `selectBy` (`trust`|`price`), `allowUntrusted`,
   `schemaName` (`gold`|`fx`) or a custom `schema`.
 
+To run your own MCP instead: `git clone https://github.com/Venkat5599/pharosskill && cd pharosskill && bun install && bun run mcp` (→ `:4030/mcp`).
+
 ### Via the SDK
+Clone the repo (`git clone https://github.com/Venkat5599/pharosskill`), then:
 ```ts
-import { createSafeBuy } from "@cashier/safebuy-sdk";
+import { createSafeBuy } from "./sdk/createSafeBuy";
 const cashier = createSafeBuy({ payerPrivateKey, providers, rpcUrl, reputationRegistry, bondContract });
 const r = await cashier.purchase({ query, schema, maxPriceUSDC, minReputation });
 ```
