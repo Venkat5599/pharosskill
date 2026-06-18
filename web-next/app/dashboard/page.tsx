@@ -192,10 +192,10 @@ function ChatView({ msgs, feedRef, inputRef, input, setInput, submit, busy, ask,
 }) {
   return (
     <div className="flex flex-1 flex-col">
-      <div ref={feedRef} className="feed flex flex-1 flex-col gap-4 overflow-y-auto scroll-smooth px-[max(28px,4vw)] py-[30px]">
+      <div ref={feedRef} className="feed flex flex-1 flex-col gap-4 overflow-y-auto scroll-smooth px-[max(28px,4vw)] pb-[30px] pt-4">
         {/* empty-state illustration */}
-        <div className="mx-auto flex flex-col items-center gap-4 pb-2 pt-[18px] text-center">
-          <svg className="loopsvg" viewBox="0 0 240 240" width="200" height="200" aria-hidden="true">
+        <div className="mx-auto flex flex-col items-center gap-3 pb-1 pt-0 text-center">
+          <svg className="loopsvg" viewBox="0 0 240 240" width="140" height="140" aria-hidden="true">
             <circle cx="120" cy="120" r="86" fill="none" stroke="rgba(20,18,16,.14)" strokeWidth="2" strokeDasharray="4 7" />
             <g className="spin">
               <circle cx="120" cy="34" r="11" fill="#ff5436" />
